@@ -1,0 +1,120 @@
+{
+    "users": [
+        {
+            "userId": "USR001",
+            "name": "Alice Chen",
+            "avatar": "🎯",
+            "profile": "casual",
+            "description": "Casual Bettor",
+            "preferredSports": [
+                "football"
+            ],
+            "preferredMarkets": [
+                "match_winner"
+            ],
+            "favoriteTeams": [
+                "Arsenal",
+                "Manchester United"
+            ],
+            "avgStake": 10,
+            "riskProfile": "low",
+            "betHistory": [
+                {
+                    "marketType": "match_winner",
+                    "count": 24
+                },
+                {
+                    "marketType": "over_under",
+                    "count": 5
+                },
+                {
+                    "marketType": "next_goal",
+                    "count": 2
+                }
+            ],
+            "winRate": 0.45,
+            "totalBets": 31
+        },
+        {
+            "userId": "USR002",
+            "name": "Marco Rossi",
+            "avatar": "⚡",
+            "profile": "enthusiast",
+            "description": "Live Betting Enthusiast",
+            "preferredSports": [
+                "football",
+                "basketball"
+            ],
+            "preferredMarkets": [
+                "next_goal",
+                "next_point"
+            ],
+            "favoriteTeams": [
+                "Liverpool",
+                "AC Milan"
+            ],
+            "avgStake": 25,
+            "riskProfile": "medium",
+            "betHistory": [
+                {
+                    "marketType": "next_goal",
+                    "count": 42
+                },
+                {
+                    "marketType": "match_winner",
+                    "count": 18
+                },
+                {
+                    "marketType": "over_under",
+                    "count": 15
+                },
+                {
+                    "marketType": "corners",
+                    "count": 8
+                }
+            ],
+            "winRate": 0.52,
+            "totalBets": 83
+        },
+        {
+            "userId": "USR003",
+            "name": "Sophie Martin",
+            "avatar": "🎪",
+            "profile": "goalsadvocate",
+            "description": "Goal Markets Fan",
+            "preferredSports": [
+                "football"
+            ],
+            "preferredMarkets": [
+                "over_under",
+                "both_teams_score"
+            ],
+            "favoriteTeams": [
+                "Bayern Munich",
+                "Real Madrid"
+            ],
+            "avgStake": 15,
+            "riskProfile": "medium",
+            "betHistory": [
+                {
+                    "marketType": "over_under",
+                    "count": 47
+                },
+                {
+                    "marketType": "both_teams_score",
+                    "count": 31
+                },
+                {
+                    "marketType": "next_goal",
+                    "count": 12
+                },
+                {
+                    "marketType": "match_winner",
+                    "count": 5
+                }
+            ],
+            "winRate": 0.48,
+            "totalBets": 95
+        }
+    ]
+}

@@ -1,0 +1,204 @@
+{
+    "markets": {
+        "MKT001": {
+            "marketId": "MKT001",
+            "eventId": "EVT001",
+            "type": "match_winner",
+            "name": "Match Winner",
+            "options": [
+                {
+                    "id": "OPT001",
+                    "label": "Manchester City",
+                    "odds": 1.65
+                },
+                {
+                    "id": "OPT002",
+                    "label": "Draw",
+                    "odds": 4.00
+                },
+                {
+                    "id": "OPT003",
+                    "label": "Arsenal",
+                    "odds": 5.50
+                }
+            ]
+        },
+        "MKT002": {
+            "marketId": "MKT002",
+            "eventId": "EVT001",
+            "type": "over_under",
+            "name": "Over/Under 2.5 Goals",
+            "options": [
+                {
+                    "id": "OPT004",
+                    "label": "Over 2.5",
+                    "odds": 1.85
+                },
+                {
+                    "id": "OPT005",
+                    "label": "Under 2.5",
+                    "odds": 2.00
+                }
+            ]
+        },
+        "MKT003": {
+            "marketId": "MKT003",
+            "eventId": "EVT001",
+            "type": "next_goal",
+            "name": "Next Goal",
+            "options": [
+                {
+                    "id": "OPT006",
+                    "label": "Manchester City",
+                    "odds": 2.40
+                },
+                {
+                    "id": "OPT007",
+                    "label": "Arsenal",
+                    "odds": 3.50
+                },
+                {
+                    "id": "OPT008",
+                    "label": "No Goal (5 mins)",
+                    "odds": 1.35
+                }
+            ]
+        },
+        "MKT004": {
+            "marketId": "MKT004",
+            "eventId": "EVT001",
+            "type": "corners",
+            "name": "Total Corners Over/Under 10.5",
+            "options": [
+                {
+                    "id": "OPT009",
+                    "label": "Over 10.5",
+                    "odds": 2.10
+                },
+                {
+                    "id": "OPT010",
+                    "label": "Under 10.5",
+                    "odds": 1.75
+                }
+            ]
+        },
+        "MKT005": {
+            "marketId": "MKT005",
+            "eventId": "EVT001",
+            "type": "both_teams_score",
+            "name": "Both Teams to Score",
+            "options": [
+                {
+                    "id": "OPT011",
+                    "label": "Yes",
+                    "odds": 1.80
+                },
+                {
+                    "id": "OPT012",
+                    "label": "No",
+                    "odds": 2.05
+                }
+            ]
+        },
+        "MKT006": {
+            "marketId": "MKT006",
+            "eventId": "EVT002",
+            "type": "match_winner",
+            "name": "Match Winner",
+            "options": [
+                {
+                    "id": "OPT013",
+                    "label": "Liverpool",
+                    "odds": 1.75
+                },
+                {
+                    "id": "OPT014",
+                    "label": "Draw",
+                    "odds": 3.80
+                },
+                {
+                    "id": "OPT015",
+                    "label": "Chelsea",
+                    "odds": 4.80
+                }
+            ]
+        },
+        "MKT007": {
+            "marketId": "MKT007",
+            "eventId": "EVT002",
+            "type": "over_under",
+            "name": "Over/Under 2.5 Goals",
+            "options": [
+                {
+                    "id": "OPT016",
+                    "label": "Over 2.5",
+                    "odds": 1.92
+                },
+                {
+                    "id": "OPT017",
+                    "label": "Under 2.5",
+                    "odds": 1.95
+                }
+            ]
+        },
+        "MKT008": {
+            "marketId": "MKT008",
+            "eventId": "EVT002",
+            "type": "next_goal",
+            "name": "Next Goal",
+            "options": [
+                {
+                    "id": "OPT018",
+                    "label": "Liverpool",
+                    "odds": 2.20
+                },
+                {
+                    "id": "OPT019",
+                    "label": "Chelsea",
+                    "odds": 3.20
+                },
+                {
+                    "id": "OPT020",
+                    "label": "No Goal (5 mins)",
+                    "odds": 1.40
+                }
+            ]
+        },
+        "MKT009": {
+            "marketId": "MKT009",
+            "eventId": "EVT002",
+            "type": "corners",
+            "name": "Total Corners Over/Under 9.5",
+            "options": [
+                {
+                    "id": "OPT021",
+                    "label": "Over 9.5",
+                    "odds": 2.05
+                },
+                {
+                    "id": "OPT022",
+                    "label": "Under 9.5",
+                    "odds": 1.80
+                }
+            ]
+        },
+        "MKT010": {
+            "marketId": "MKT010",
+            "eventId": "EVT002",
+            "type": "both_teams_score",
+            "name": "Both Teams to Score",
+            "options": [
+                {
+                    "id": "OPT023",
+                    "label": "Yes",
+                    "odds": 1.75
+                },
+                {
+                    "id": "OPT024",
+                    "label": "No",
+                    "odds": 2.15
+                }
+            ]
+        }
+    }
+}

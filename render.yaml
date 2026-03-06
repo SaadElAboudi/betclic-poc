@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: betclic-poc-backend
+    runtime: node
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+    routes:
+      - path: /api
+        destination: /api
+
+  - type: web
+    name: betclic-poc-frontend
+    runtime: node
+    buildCommand: cd frontend && npm install && npm run build
+    startCommand: cd frontend && npm run preview
+    envVars:
+      - key: NODE_ENV
+        value: production

@@ -1,0 +1,127 @@
+{
+    "events": [
+        {
+            "eventId": "EVT001",
+            "sport": "football",
+            "league": "Premier League",
+            "homeTeam": "Manchester City",
+            "awayTeam": "Arsenal",
+            "kickoff": "2026-03-08T15:00Z",
+            "status": "live",
+            "minute": 72,
+            "homeScore": 2,
+            "awayScore": 1,
+            "stats": {
+                "possession": {
+                    "home": 58,
+                    "away": 42
+                },
+                "shots": {
+                    "home": 12,
+                    "away": 8
+                },
+                "shotsOnTarget": {
+                    "home": 7,
+                    "away": 3
+                },
+                "corners": {
+                    "home": 5,
+                    "away": 2
+                },
+                "fouls": {
+                    "home": 8,
+                    "away": 11
+                }
+            },
+            "marketIds": [
+                "MKT001",
+                "MKT002",
+                "MKT003",
+                "MKT004",
+                "MKT005"
+            ]
+        },
+        {
+            "eventId": "EVT002",
+            "sport": "football",
+            "league": "Premier League",
+            "homeTeam": "Liverpool",
+            "awayTeam": "Chelsea",
+            "kickoff": "2026-03-08T17:30Z",
+            "status": "live",
+            "minute": 45,
+            "homeScore": 1,
+            "awayScore": 0,
+            "stats": {
+                "possession": {
+                    "home": 62,
+                    "away": 38
+                },
+                "shots": {
+                    "home": 8,
+                    "away": 5
+                },
+                "shotsOnTarget": {
+                    "home": 4,
+                    "away": 2
+                },
+                "corners": {
+                    "home": 3,
+                    "away": 1
+                },
+                "fouls": {
+                    "home": 6,
+                    "away": 9
+                }
+            },
+            "marketIds": [
+                "MKT006",
+                "MKT007",
+                "MKT008",
+                "MKT009",
+                "MKT010"
+            ]
+        },
+        {
+            "eventId": "EVT003",
+            "sport": "football",
+            "league": "La Liga",
+            "homeTeam": "Real Madrid",
+            "awayTeam": "Barcelona",
+            "kickoff": "2026-03-09T20:00Z",
+            "status": "upcoming",
+            "minute": 0,
+            "homeScore": 0,
+            "awayScore": 0,
+            "stats": {
+                "possession": {
+                    "home": 0,
+                    "away": 0
+                },
+                "shots": {
+                    "home": 0,
+                    "away": 0
+                },
+                "shotsOnTarget": {
+                    "home": 0,
+                    "away": 0
+                },
+                "corners": {
+                    "home": 0,
+                    "away": 0
+                },
+                "fouls": {
+                    "home": 0,
+                    "away": 0
+                }
+            },
+            "marketIds": [
+                "MKT011",
+                "MKT012",
+                "MKT013",
+                "MKT014",
+                "MKT015"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    @apply bg-betclic-grayLight text-gray-900;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+    min-height: 100vh;
+}
+
+.bet-card {
+    @apply bg-white rounded-md p-4 border border-betclic-grayBorder hover:border-betclic-red transition-colors shadow-sm;
+}
+
+.odds-badge {
+    @apply bg-white text-gray-900 font-bold rounded-md px-3 py-1.5 text-sm border border-betclic-grayBorder;
+}
+
+.btn-primary {
+    @apply bg-betclic-red text-white font-semibold px-4 py-2 rounded-md hover:bg-betclic-redHover transition-colors;
+}
+
+.btn-secondary {
+    @apply bg-white text-gray-700 border border-betclic-grayBorder px-4 py-2 rounded-md hover:border-betclic-red transition-colors;
+}
+
+.market-type-badge {
+    @apply inline-block bg-betclic-grayLight text-betclic-grayText text-xs font-semibold px-3 py-1 rounded-full;
+}

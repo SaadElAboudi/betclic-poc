@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { formatOdds } from '../lib/api';
 
-export function MarketGrid({ markets, onAddToBet }) {
+export function MarketGrid({ markets, event, onAddToBet, recommendedMarketIds = [] }) {
     const [activeTab, setActiveTab] = useState('popular');
     const [expandedSections, setExpandedSections] = useState(new Set(['popular']));
 
@@ -38,14 +38,27 @@ export function MarketGrid({ markets, onAddToBet }) {
     const renderMarket = (market) => {
         const isThreeWay = market.options.length === 3 && market.type === 'match_winner';
         const isGrid = market.options.length > 3;
+        const isRecommended = recommendedMarketIds.includes(market.marketId);
 
         return (
-            <div key={market.marketId} className="bg-white border border-betclic-grayBorder rounded-lg p-3 shadow-sm hover:shadow-md transition">
-                <div className="flex items-center gap-2 mb-2.5">
+            <div
+                key={market.marketId}
+                className={`bg-white border rounded-lg p-3 shadow-sm hover:shadow-md transition ${
+                    isRecommended ? 'border-betclic-red/60' : 'border-betclic-grayBorder'
+                }`}
+            >
+                <div className="flex items-center justify-between gap-2 mb-2.5">
+                    <div className="flex items-center gap-2">
                     {market.icon && <span className="text-base">{market.icon}</span>}
                     <div className="text-[11px] text-betclic-grayText uppercase tracking-wider font-bold">
                         {market.name}
                     </div>
+                    </div>
+                    {isRecommended && (
+                        <span className="text-[10px] px-2 py-0.5 rounded bg-betclic-red text-white font-semibold">
+                            Pour vous
+                        </span>
+                    )}
                 </div>
                 <div className={`grid gap-2 ${isThreeWay ? 'grid-cols-3' :
                         isGrid ? 'grid-cols-2' :
@@ -76,7 +89,7 @@ export function MarketGrid({ markets, onAddToBet }) {
     };
 
     const renderCategorySection = (categoryId) => {
-        const categoryMarkets = groupedMarkets[categoryId] || [];
+        const categoryMarkets = sortMarketsByPertinence(groupedMarkets[categoryId] || [], event, recommendedMarketIds);
         if (categoryMarkets.length === 0) return null;
 
         const isExpanded = expandedSections.has(categoryId);
@@ -111,7 +124,11 @@ export function MarketGrid({ markets, onAddToBet }) {
     };
 
     // For tab view (desktop)
-    const currentCategoryMarkets = groupedMarkets[activeTab] || [];
+    const currentCategoryMarkets = sortMarketsByPertinence(
+        groupedMarkets[activeTab] || [],
+        event,
+        recommendedMarketIds
+    );
 
     return (
         <div className="space-y-3">
@@ -150,4 +167,28 @@ export function MarketGrid({ markets, onAddToBet }) {
             </div>
         </div>
     );
+}
+
+function sortMarketsByPertinence(markets, event, recommendedMarketIds) {
+    if (!Array.isArray(markets)) return [];
+
+    const totalGoals = (event?.homeScore || 0) + (event?.awayScore || 0);
+    const totalShots = (event?.stats?.shots?.home || 0) + (event?.stats?.shots?.away || 0);
+    const minute = event?.minute || 0;
+
+    const scoreMarket = (market) => {
+        let score = 0;
+
+        if (recommendedMarketIds.includes(market.marketId)) score += 100;
+        if (market.category === 'popular') score += 30;
+
+        if (market.type === 'next_goal' && (totalShots >= 14 || minute >= 60)) score += 20;
+        if (market.type.startsWith('over_under_') && totalGoals >= 2) score += 18;
+        if (market.type === 'both_teams_score' && totalGoals >= 2) score += 16;
+        if (market.type === 'corners' && (event?.stats?.corners?.home || 0) + (event?.stats?.corners?.away || 0) >= 6) score += 14;
+
+        return score;
+    };
+
+    return [...markets].sort((a, b) => scoreMarket(b) - scoreMarket(a));
 }

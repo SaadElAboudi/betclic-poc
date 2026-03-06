@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '../lib/api';
 import { useUser } from '../context/UserContext';
-import { MatchHeader } from '../components/MatchHeader';
 import { LiveStats } from '../components/LiveStats';
 import { MarketGrid } from '../components/MarketGrid';
 import { RecommendationPanel } from '../components/RecommendationPanel';
@@ -222,13 +221,22 @@ export function MatchPage() {
                             <h2 className="text-[11px] font-bold text-gray-900 mb-4 uppercase tracking-[0.14em]">
                                 📊 Tous les paris disponibles
                             </h2>
-                            <MarketGrid markets={markets} onAddToBet={handleAddToBet} />
+                            <MarketGrid
+                                markets={markets}
+                                event={currentEvent}
+                                onAddToBet={handleAddToBet}
+                                recommendedMarketIds={recommendations.map((rec) => rec.marketId)}
+                            />
                         </div>
                     </div>
 
                     {/* Right Column - Recommendations Sidebar */}
                     <div className="lg:col-span-1">
-                        <RecommendationPanel recommendations={recommendations} loading={recLoading} />
+                        <RecommendationPanel
+                            recommendations={recommendations}
+                            loading={recLoading}
+                            onAddToBet={handleAddToBet}
+                        />
                     </div>
                 </div>
             </main>

@@ -1,6 +1,6 @@
 import { formatOdds } from '../lib/api';
 
-export function RecommendationPanel({ recommendations, loading }) {
+export function RecommendationPanel({ recommendations, loading, onAddToBet }) {
     if (loading) {
         return (
             <div className="bg-white border border-betclic-grayBorder rounded-md p-4 shadow-sm">
@@ -38,13 +38,28 @@ export function RecommendationPanel({ recommendations, loading }) {
                         key={rec.marketId}
                         className="bg-betclic-redLight border border-betclic-red/30 rounded-md p-3 hover:border-betclic-red transition"
                     >
+                        {rec.tags?.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mb-2">
+                                {rec.tags.slice(0, 3).map((tag) => (
+                                    <span
+                                        key={`${rec.marketId}-${tag}`}
+                                        className="text-[10px] px-1.5 py-0.5 rounded bg-white border border-betclic-grayBorder text-betclic-grayText font-semibold"
+                                    >
+                                        {tag}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+
                         <div className="flex justify-between items-start mb-2">
                             <div className="flex-1">
                                 <div className="text-gray-900 font-semibold text-sm mb-0.5">{rec.name}</div>
-                                <div className="text-betclic-grayText text-xs">{rec.options[0]?.label}</div>
+                                <div className="text-betclic-grayText text-xs">
+                                    {rec.selectedOption?.fullLabel || rec.selectedOption?.label || rec.options[0]?.label}
+                                </div>
                             </div>
                             <div className="bg-betclic-red text-white px-3 py-1.5 rounded-md font-extrabold ml-3">
-                                {formatOdds(rec.options[0]?.odds)}
+                                {formatOdds(rec.selectedOption?.odds || rec.options[0]?.odds)}
                             </div>
                         </div>
 
@@ -64,7 +79,15 @@ export function RecommendationPanel({ recommendations, loading }) {
                             <span className="text-betclic-red text-xs font-bold">{Math.min(rec.normalizedScore || 50, 100)}%</span>
                         </div>
 
-                        <button className="w-full bg-betclic-red hover:bg-betclic-redHover text-white font-bold py-2 rounded-md text-sm transition tracking-wide">
+                        <button
+                            onClick={() => onAddToBet?.({
+                                id: rec.selectedOption?.id || `${rec.marketId}-suggestion`,
+                                market: rec.name,
+                                selection: rec.selectedOption?.fullLabel || rec.selectedOption?.label || rec.options[0]?.label,
+                                odds: rec.selectedOption?.odds || rec.options[0]?.odds,
+                            })}
+                            className="w-full bg-betclic-red hover:bg-betclic-redHover text-white font-bold py-2 rounded-md text-sm transition tracking-wide"
+                        >
                             Ajouter au pari
                         </button>
                     </div>

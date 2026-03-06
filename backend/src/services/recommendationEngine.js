@@ -1,115 +1,189 @@
-// Recommendation scoring logic based on user preferences and match context
+// Recommendation scoring logic based on user preferences and live match context
 export function getPersonalizedRecommendations(user, event, markets) {
     if (!user || !event || !markets) {
         return [];
     }
 
-    const recommendations = [];
-    const MAX_SCORE = 130; // Maximum possible score from all rules
+    const MAX_SCORE = 140;
+    const totalGoals = (event.homeScore || 0) + (event.awayScore || 0);
+    const totalShots = (event.stats?.shots?.home || 0) + (event.stats?.shots?.away || 0);
+    const totalShotsOnTarget =
+        (event.stats?.shotsOnTarget?.home || 0) + (event.stats?.shotsOnTarget?.away || 0);
+    const totalCorners = (event.stats?.corners?.home || 0) + (event.stats?.corners?.away || 0);
+    const minute = event.minute || 0;
 
-    // Score each market based on user preferences and match context
+    const isGoalHeavy = totalGoals >= 2 || totalShotsOnTarget >= 6;
+    const isHighPace = totalShots >= 16 || totalShotsOnTarget >= 7;
+
     const scoredMarkets = Object.values(markets).map((market) => {
         let score = 0;
-        let reasons = [];
+        const reasons = [];
+        const tags = new Set();
 
-        if (market.eventId !== event.eventId) {
-            return { ...market, score: -1, reasons: [] };
+        // Rule 1: User preferred markets
+        if (user.preferredMarkets?.includes(market.type)) {
+            score += 28;
+            reasons.push(`Ce type de pari correspond à vos habitudes (${market.name.toLowerCase()}).`);
+            tags.add("Pour vous");
         }
 
-        // Rule 1: User's preferred market types
-        if (user.preferredMarkets.includes(market.type)) {
-            score += 30;
-            reasons.push(`You frequently bet on ${market.type.replace(/_/g, " ")} markets.`);
+        // Rule 2: Favorite team context
+        const followsHome = user.favoriteTeams?.includes(event.homeTeam);
+        const followsAway = user.favoriteTeams?.includes(event.awayTeam);
+        if (followsHome || followsAway) {
+            score += 18;
+            const watchedTeam = followsHome ? event.homeTeam : event.awayTeam;
+            reasons.push(`Vous suivez souvent ${watchedTeam}, ce marché est pertinent sur ce match.`);
         }
 
-        // Rule 2: User's favorite teams
-        const homeTeam = event.homeTeam;
-        const awayTeam = event.awayTeam;
-        if (user.favoriteTeams.includes(homeTeam) || user.favoriteTeams.includes(awayTeam)) {
-            score += 25;
-            const team = user.favoriteTeams.includes(homeTeam) ? homeTeam : awayTeam;
-            reasons.push(`You frequently bet on ${team} matches.`);
-        }
-
-        // Rule 3: Match context - high-scoring matches suggest goal markets
-        if (market.type === "over_under") {
-            const totalScore = event.homeScore + event.awayScore;
-            if (totalScore >= 2) {
-                score += 20;
-                reasons.push("This match has high goal activity.");
-            }
-        }
-
-        // Rule 4: Match context - high shots suggest next goal
-        if (market.type === "next_goal") {
-            const totalShots = event.stats.shots.home + event.stats.shots.away;
-            if (totalShots >= 10) {
+        // Rule 3: Live context by market type
+        if (market.type.startsWith("over_under_") || market.type === "both_teams_score") {
+            if (isGoalHeavy) {
                 score += 18;
-                reasons.push("High number of shots on target detected.");
+                reasons.push("Le rythme offensif est élevé sur ce match en direct.");
+                tags.add("Match chaud");
             }
         }
 
-        // Rule 5: Match context - high corners suggest corner markets
-        if (market.type === "corners") {
-            const totalCorners = event.stats.corners.home + event.stats.corners.away;
-            if (totalCorners >= 4) {
-                score += 15;
-                reasons.push("Increased corner activity in this match.");
-            }
-        }
-
-        // Rule 6: Balance - if user is goal market enthusiast
-        if (user.profile === "goalsadvocate") {
-            if (market.type === "over_under" || market.type === "both_teams_score") {
-                score += 15;
-            }
-        }
-
-        // Rule 7: Balance - if user is live betting enthusiast
-        if (user.profile === "enthusiast") {
-            if (market.type === "next_goal" || market.type === "next_point") {
+        if (market.type === "next_goal") {
+            if (isHighPace) {
                 score += 20;
+                reasons.push("Beaucoup d'occasions en cours, marché live très actif.");
+                tags.add("Live");
             }
         }
 
-        // Rule 8: Odds attractiveness
-        const avgOdds =
-            market.options.reduce((sum, opt) => sum + opt.odds, 0) / market.options.length;
-        if (avgOdds >= 1.80 && avgOdds <= 2.50) {
-            score += 10;
+        if (market.type === "corners" && totalCorners >= 6) {
+            score += 14;
+            reasons.push("Le volume de corners est déjà élevé.");
         }
 
-        return { ...market, score, reasons };
+        if (market.type === "cards" && minute >= 60) {
+            score += 10;
+            reasons.push("La fin de match augmente souvent l'intensité des duels.");
+        }
+
+        // Rule 4: Profile adaptation
+        if (user.profile === "goalsadvocate") {
+            if (market.category === "goals") {
+                score += 14;
+                tags.add("Profil buts");
+            }
+        }
+
+        if (user.profile === "enthusiast") {
+            if (["next_goal", "correct_score", "halftime_fulltime"].includes(market.type)) {
+                score += 14;
+                tags.add("Dynamique");
+            }
+        }
+
+        if (user.profile === "conservative") {
+            if (["match_winner", "double_chance", "both_teams_score"].includes(market.type)) {
+                score += 12;
+                tags.add("Safe");
+            }
+        }
+
+        // Rule 5: Odds quality (balanced price zone)
+        const avgOdds =
+            market.options.reduce((sum, opt) => sum + opt.odds, 0) / Math.max(1, market.options.length);
+        if (avgOdds >= 1.65 && avgOdds <= 2.35) {
+            score += 12;
+            tags.add("Value");
+        }
+
+        // Rule 6: late-game urgency
+        if (minute >= 70 && ["next_goal", "match_winner", "both_teams_score"].includes(market.type)) {
+            score += 10;
+            reasons.push("Marché cohérent avec la phase finale du match.");
+            tags.add("Fin de match");
+        }
+
+        const selectedOption = pickBestOption(market, event);
+
+        return { ...market, score, reasons, tags: Array.from(tags), selectedOption };
     });
 
-    // Filter, sort, and return top 3 recommendations
     const topRecommendations = scoredMarkets
         .filter((m) => m.score > 0)
         .sort((a, b) => b.score - a.score)
-        .slice(0, 3);
+        .slice(0, 4);
 
     return topRecommendations.map((rec) => ({
         marketId: rec.marketId,
         type: rec.type,
         name: rec.name,
         options: rec.options,
+        selectedOption: rec.selectedOption,
         reasons: rec.reasons,
+        tags: rec.tags,
         score: Math.min(rec.score, MAX_SCORE),
         normalizedScore: Math.round((Math.min(rec.score, MAX_SCORE) / MAX_SCORE) * 100),
     }));
 }
 
+function pickBestOption(market, event) {
+    const options = market.options || [];
+    if (options.length === 0) return null;
+
+    const homeIsLeading = (event.homeScore || 0) > (event.awayScore || 0);
+    const awayIsLeading = (event.awayScore || 0) > (event.homeScore || 0);
+    const totalGoals = (event.homeScore || 0) + (event.awayScore || 0);
+    const totalShots = (event.stats?.shots?.home || 0) + (event.stats?.shots?.away || 0);
+
+    if (market.type === "match_winner") {
+        if (homeIsLeading) {
+            return (
+                options.find((o) => (o.fullLabel || o.label || "").includes(event.homeTeam)) || options[0]
+            );
+        }
+        if (awayIsLeading) {
+            return (
+                options.find((o) => (o.fullLabel || o.label || "").includes(event.awayTeam)) || options[0]
+            );
+        }
+    }
+
+    if (market.type.startsWith("over_under_")) {
+        const overOption = options.find((o) => o.label?.toLowerCase().includes("plus"));
+        const underOption = options.find((o) => o.label?.toLowerCase().includes("moins"));
+        return totalGoals >= 2 || totalShots >= 16 ? overOption || options[0] : underOption || options[0];
+    }
+
+    if (market.type === "both_teams_score") {
+        const yes = options.find((o) => o.label?.toLowerCase() === "oui");
+        const no = options.find((o) => o.label?.toLowerCase() === "non");
+        const bothScored = event.homeScore > 0 && event.awayScore > 0;
+        return bothScored || totalShots >= 16 ? yes || options[0] : no || options[0];
+    }
+
+    if (market.type === "next_goal") {
+        const homeShots = event.stats?.shotsOnTarget?.home || 0;
+        const awayShots = event.stats?.shotsOnTarget?.away || 0;
+        if (homeShots >= awayShots) {
+            return options.find((o) => (o.label || "").includes(event.homeTeam)) || options[0];
+        }
+        return options.find((o) => (o.label || "").includes(event.awayTeam)) || options[0];
+    }
+
+    // Default: pick the option with best balance (closest to 2.00)
+    return options.reduce((best, current) =>
+        Math.abs(current.odds - 2) < Math.abs(best.odds - 2) ? current : best
+    );
+}
+
 // Generate a natural language explanation for a recommendation
 export function generateExplanation(reasons) {
     if (!reasons || reasons.length === 0) {
-        return "Based on your betting profile";
+        return "Sélection basée sur votre profil et le contexte live.";
     }
 
     if (reasons.length === 1) {
         return reasons[0];
     }
 
-    return reasons.slice(0, 2).join(" Also, ");
+    return reasons.slice(0, 2).join(" ");
 }
 
 // Get betting statistics for a user

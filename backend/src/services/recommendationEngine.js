@@ -33,7 +33,7 @@ export function getPersonalizedRecommendations(user, event, markets) {
         if (followsHome || followsAway) {
             score += 18;
             const watchedTeam = followsHome ? event.homeTeam : event.awayTeam;
-            reasons.push(`Vous suivez souvent ${watchedTeam}, ce marché est pertinent sur ce match.`);
+            reasons.push(`Vous suivez souvent ${watchedTeam}, ce type de pari est pertinent sur ce match.`);
         }
 
         // Rule 3: Live context by market type

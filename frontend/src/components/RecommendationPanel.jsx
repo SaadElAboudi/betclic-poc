@@ -36,7 +36,7 @@ export function RecommendationPanel({ recommendations, loading, onAddToBet }) {
                 {recommendations.map((rec) => (
                     <div
                         key={rec.marketId}
-                        className="bg-betclic-redLight border border-betclic-red/30 rounded-md p-3 hover:border-betclic-red transition"
+                        className="bg-white border border-betclic-grayBorder rounded-lg p-3 shadow-sm hover:shadow-md transition"
                     >
                         {rec.tags?.length > 0 && (
                             <div className="flex flex-wrap gap-1 mb-2">
@@ -58,7 +58,7 @@ export function RecommendationPanel({ recommendations, loading, onAddToBet }) {
                                     {rec.selectedOption?.fullLabel || rec.selectedOption?.label || rec.options[0]?.label}
                                 </div>
                             </div>
-                            <div className="bg-betclic-red text-white px-3 py-1.5 rounded-md font-extrabold ml-3">
+                            <div className="bg-betclic-yellow text-gray-900 border border-betclic-yellow px-3 py-1.5 rounded-md font-extrabold ml-3">
                                 {formatOdds(rec.selectedOption?.odds || rec.options[0]?.odds)}
                             </div>
                         </div>
@@ -86,7 +86,7 @@ export function RecommendationPanel({ recommendations, loading, onAddToBet }) {
                                 selection: rec.selectedOption?.fullLabel || rec.selectedOption?.label || rec.options[0]?.label,
                                 odds: rec.selectedOption?.odds || rec.options[0]?.odds,
                             })}
-                            className="w-full bg-betclic-red hover:bg-betclic-redHover text-white font-bold py-2 rounded-md text-sm transition tracking-wide"
+                            className="w-full bg-betclic-yellow hover:bg-betclic-yellowHover border border-betclic-yellow hover:border-betclic-yellowHover text-gray-900 font-bold py-2 rounded-md text-sm transition tracking-wide uppercase"
                         >
                             Ajouter au pari
                         </button>

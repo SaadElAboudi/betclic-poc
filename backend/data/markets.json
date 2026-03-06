@@ -4,21 +4,26 @@
             "marketId": "MKT001",
             "eventId": "EVT001",
             "type": "match_winner",
-            "name": "Match Winner",
+            "name": "Résultat du match",
+            "category": "popular",
+            "icon": "🏆",
             "options": [
                 {
                     "id": "OPT001",
-                    "label": "Manchester City",
+                    "label": "1",
+                    "fullLabel": "Manchester City",
                     "odds": 1.65
                 },
                 {
                     "id": "OPT002",
-                    "label": "Draw",
+                    "label": "X",
+                    "fullLabel": "Nul",
                     "odds": 4.00
                 },
                 {
                     "id": "OPT003",
-                    "label": "Arsenal",
+                    "label": "2",
+                    "fullLabel": "Arsenal",
                     "odds": 5.50
                 }
             ]
@@ -26,17 +31,19 @@
         "MKT002": {
             "marketId": "MKT002",
             "eventId": "EVT001",
-            "type": "over_under",
-            "name": "Over/Under 2.5 Goals",
+            "type": "over_under_2_5",
+            "name": "Plus/Moins de 2.5 buts",
+            "category": "popular",
+            "icon": "⚽",
             "options": [
                 {
                     "id": "OPT004",
-                    "label": "Over 2.5",
+                    "label": "Plus de 2.5",
                     "odds": 1.85
                 },
                 {
                     "id": "OPT005",
-                    "label": "Under 2.5",
+                    "label": "Moins de 2.5",
                     "odds": 2.00
                 }
             ]
@@ -44,159 +51,334 @@
         "MKT003": {
             "marketId": "MKT003",
             "eventId": "EVT001",
-            "type": "next_goal",
-            "name": "Next Goal",
+            "type": "both_teams_score",
+            "name": "Les deux équipes marquent",
+            "category": "popular",
+            "icon": "⚽",
             "options": [
                 {
-                    "id": "OPT006",
-                    "label": "Manchester City",
-                    "odds": 2.40
+                    "id": "OPT011",
+                    "label": "Oui",
+                    "odds": 1.80
                 },
                 {
-                    "id": "OPT007",
-                    "label": "Arsenal",
-                    "odds": 3.50
-                },
-                {
-                    "id": "OPT008",
-                    "label": "No Goal (5 mins)",
-                    "odds": 1.35
+                    "id": "OPT012",
+                    "label": "Non",
+                    "odds": 2.05
                 }
             ]
         },
         "MKT004": {
             "marketId": "MKT004",
             "eventId": "EVT001",
-            "type": "corners",
-            "name": "Total Corners Over/Under 10.5",
+            "type": "double_chance",
+            "name": "Double chance",
+            "category": "popular",
+            "icon": "🎯",
             "options": [
                 {
-                    "id": "OPT009",
-                    "label": "Over 10.5",
-                    "odds": 2.10
+                    "id": "OPT013",
+                    "label": "1X",
+                    "fullLabel": "Manchester City ou Nul",
+                    "odds": 1.22
                 },
                 {
-                    "id": "OPT010",
-                    "label": "Under 10.5",
-                    "odds": 1.75
+                    "id": "OPT014",
+                    "label": "X2",
+                    "fullLabel": "Nul ou Arsenal",
+                    "odds": 2.15
+                },
+                {
+                    "id": "OPT015",
+                    "label": "12",
+                    "fullLabel": "Manchester City ou Arsenal",
+                    "odds": 1.35
                 }
             ]
         },
         "MKT005": {
             "marketId": "MKT005",
             "eventId": "EVT001",
-            "type": "both_teams_score",
-            "name": "Both Teams to Score",
+            "type": "over_under_1_5",
+            "name": "Plus/Moins de 1.5 buts",
+            "category": "goals",
+            "icon": "⚽",
             "options": [
                 {
-                    "id": "OPT011",
-                    "label": "Yes",
-                    "odds": 1.80
+                    "id": "OPT016",
+                    "label": "Plus de 1.5",
+                    "odds": 1.25
                 },
                 {
-                    "id": "OPT012",
-                    "label": "No",
-                    "odds": 2.05
+                    "id": "OPT017",
+                    "label": "Moins de 1.5",
+                    "odds": 3.80
                 }
             ]
         },
         "MKT006": {
             "marketId": "MKT006",
-            "eventId": "EVT002",
-            "type": "match_winner",
-            "name": "Match Winner",
+            "eventId": "EVT001",
+            "type": "over_under_3_5",
+            "name": "Plus/Moins de 3.5 buts",
+            "category": "goals",
+            "icon": "⚽",
             "options": [
                 {
-                    "id": "OPT013",
-                    "label": "Liverpool",
-                    "odds": 1.75
+                    "id": "OPT018",
+                    "label": "Plus de 3.5",
+                    "odds": 2.40
                 },
                 {
-                    "id": "OPT014",
-                    "label": "Draw",
-                    "odds": 3.80
-                },
-                {
-                    "id": "OPT015",
-                    "label": "Chelsea",
-                    "odds": 4.80
+                    "id": "OPT019",
+                    "label": "Moins de 3.5",
+                    "odds": 1.55
                 }
             ]
         },
         "MKT007": {
             "marketId": "MKT007",
-            "eventId": "EVT002",
-            "type": "over_under",
-            "name": "Over/Under 2.5 Goals",
+            "eventId": "EVT001",
+            "type": "over_under_4_5",
+            "name": "Plus/Moins de 4.5 buts",
+            "category": "goals",
+            "icon": "⚽",
             "options": [
                 {
-                    "id": "OPT016",
-                    "label": "Over 2.5",
-                    "odds": 1.92
+                    "id": "OPT020",
+                    "label": "Plus de 4.5",
+                    "odds": 4.50
                 },
                 {
-                    "id": "OPT017",
-                    "label": "Under 2.5",
-                    "odds": 1.95
+                    "id": "OPT021",
+                    "label": "Moins de 4.5",
+                    "odds": 1.18
                 }
             ]
         },
         "MKT008": {
             "marketId": "MKT008",
-            "eventId": "EVT002",
+            "eventId": "EVT001",
             "type": "next_goal",
-            "name": "Next Goal",
+            "name": "Prochain but",
+            "category": "goals",
+            "icon": "⏱️",
             "options": [
                 {
-                    "id": "OPT018",
-                    "label": "Liverpool",
-                    "odds": 2.20
+                    "id": "OPT022",
+                    "label": "Manchester City",
+                    "odds": 2.40
                 },
                 {
-                    "id": "OPT019",
-                    "label": "Chelsea",
-                    "odds": 3.20
+                    "id": "OPT023",
+                    "label": "Arsenal",
+                    "odds": 3.50
                 },
                 {
-                    "id": "OPT020",
-                    "label": "No Goal (5 mins)",
-                    "odds": 1.40
+                    "id": "OPT024",
+                    "label": "Aucun but",
+                    "odds": 1.35
                 }
             ]
         },
         "MKT009": {
             "marketId": "MKT009",
-            "eventId": "EVT002",
-            "type": "corners",
-            "name": "Total Corners Over/Under 9.5",
+            "eventId": "EVT001",
+            "type": "halftime_fulltime",
+            "name": "Mi-temps / Fin de match",
+            "category": "results",
+            "icon": "⏰",
             "options": [
                 {
-                    "id": "OPT021",
-                    "label": "Over 9.5",
-                    "odds": 2.05
+                    "id": "OPT025",
+                    "label": "1/1",
+                    "fullLabel": "Man City / Man City",
+                    "odds": 2.80
                 },
                 {
-                    "id": "OPT022",
-                    "label": "Under 9.5",
-                    "odds": 1.80
+                    "id": "OPT026",
+                    "label": "1/X",
+                    "fullLabel": "Man City / Nul",
+                    "odds": 12.00
+                },
+                {
+                    "id": "OPT027",
+                    "label": "1/2",
+                    "fullLabel": "Man City / Arsenal",
+                    "odds": 25.00
+                },
+                {
+                    "id": "OPT028",
+                    "label": "X/1",
+                    "fullLabel": "Nul / Man City",
+                    "odds": 5.50
+                },
+                {
+                    "id": "OPT029",
+                    "label": "X/X",
+                    "fullLabel": "Nul / Nul",
+                    "odds": 8.00
+                },
+                {
+                    "id": "OPT030",
+                    "label": "X/2",
+                    "fullLabel": "Nul / Arsenal",
+                    "odds": 15.00
                 }
             ]
         },
         "MKT010": {
             "marketId": "MKT010",
-            "eventId": "EVT002",
-            "type": "both_teams_score",
-            "name": "Both Teams to Score",
+            "eventId": "EVT001",
+            "type": "correct_score",
+            "name": "Score exact",
+            "category": "results",
+            "icon": "🎯",
             "options": [
                 {
-                    "id": "OPT023",
-                    "label": "Yes",
-                    "odds": 1.75
+                    "id": "OPT031",
+                    "label": "1-0",
+                    "odds": 8.50
                 },
                 {
-                    "id": "OPT024",
-                    "label": "No",
-                    "odds": 2.15
+                    "id": "OPT032",
+                    "label": "2-0",
+                    "odds": 9.00
+                },
+                {
+                    "id": "OPT033",
+                    "label": "2-1",
+                    "odds": 7.50
+                },
+                {
+                    "id": "OPT034",
+                    "label": "3-0",
+                    "odds": 12.00
+                },
+                {
+                    "id": "OPT035",
+                    "label": "3-1",
+                    "odds": 11.00
+                },
+                {
+                    "id": "OPT036",
+                    "label": "0-0",
+                    "odds": 10.00
+                },
+                {
+                    "id": "OPT037",
+                    "label": "1-1",
+                    "odds": 6.50
+                },
+                {
+                    "id": "OPT038",
+                    "label": "2-2",
+                    "odds": 13.00
+                }
+            ]
+        },
+        "MKT011": {
+            "marketId": "MKT011",
+            "eventId": "EVT001",
+            "type": "corners",
+            "name": "Total corners Plus/Moins 10.5",
+            "category": "stats",
+            "icon": "📐",
+            "options": [
+                {
+                    "id": "OPT039",
+                    "label": "Plus de 10.5",
+                    "odds": 2.10
+                },
+                {
+                    "id": "OPT040",
+                    "label": "Moins de 10.5",
+                    "odds": 1.75
+                }
+            ]
+        },
+        "MKT012": {
+            "marketId": "MKT012",
+            "eventId": "EVT001",
+            "type": "cards",
+            "name": "Total cartons Plus/Moins 4.5",
+            "category": "stats",
+            "icon": "🟨",
+            "options": [
+                {
+                    "id": "OPT041",
+                    "label": "Plus de 4.5",
+                    "odds": 1.95
+                },
+                {
+                    "id": "OPT042",
+                    "label": "Moins de 4.5",
+                    "odds": 1.85
+                }
+            ]
+        },
+        "MKT013": {
+            "marketId": "MKT013",
+            "eventId": "EVT001",
+            "type": "handicap_asian",
+            "name": "Handicap Asiatique",
+            "category": "handicap",
+            "icon": "⚖️",
+            "options": [
+                {
+                    "id": "OPT043",
+                    "label": "Man City -1.5",
+                    "odds": 2.85
+                },
+                {
+                    "id": "OPT044",
+                    "label": "Arsenal +1.5",
+                    "odds": 1.45
+                }
+            ]
+        },
+        "MKT014": {
+            "marketId": "MKT014",
+            "eventId": "EVT001",
+            "type": "team_goals_over",
+            "name": "Man City marque Plus/Moins 1.5",
+            "category": "goals",
+            "icon": "⚽",
+            "options": [
+                {
+                    "id": "OPT045",
+                    "label": "Plus de 1.5",
+                    "odds": 1.65
+                },
+                {
+                    "id": "OPT046",
+                    "label": "Moins de 1.5",
+                    "odds": 2.25
+                }
+            ]
+        },
+        "MKT015": {
+            "marketId": "MKT015",
+            "eventId": "EVT001",
+            "type": "win_to_nil",
+            "name": "Gagne sans encaisser",
+            "category": "results",
+            "icon": "🛡️",
+            "options": [
+                {
+                    "id": "OPT047",
+                    "label": "Man City",
+                    "odds": 3.20
+                },
+                {
+                    "id": "OPT048",
+                    "label": "Arsenal",
+                    "odds": 9.50
+                },
+                {
+                    "id": "OPT049",
+                    "label": "Aucune",
+                    "odds": 1.75
                 }
             ]
         }

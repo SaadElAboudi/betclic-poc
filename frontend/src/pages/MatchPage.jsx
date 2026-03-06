@@ -6,6 +6,7 @@ import { LiveStats } from '../components/LiveStats';
 import { MarketGrid } from '../components/MarketGrid';
 import { RecommendationPanel } from '../components/RecommendationPanel';
 import { UserProfileSelector } from '../components/UserProfileSelector';
+import { BetSlip } from '../components/BetSlip';
 
 export function MatchPage() {
     const { selectedUserId, setUsers } = useUser();
@@ -16,6 +17,7 @@ export function MatchPage() {
     const [users, setUsersState] = useState([]);
     const [loading, setLoading] = useState(true);
     const [recLoading, setRecLoading] = useState(false);
+    const [betSlip, setBetSlip] = useState([]);
 
     // Load initial data
     useEffect(() => {
@@ -66,6 +68,26 @@ export function MatchPage() {
 
         loadRecommendations();
     }, [currentEvent, selectedUserId]);
+
+    // Bet slip handlers
+    const handleAddToBet = (bet) => {
+        // Check if bet already exists
+        if (betSlip.some(b => b.id === bet.id)) {
+            // Remove it if already added
+            setBetSlip(betSlip.filter(b => b.id !== bet.id));
+        } else {
+            // Add new bet
+            setBetSlip([...betSlip, bet]);
+        }
+    };
+
+    const handleRemoveBet = (betId) => {
+        setBetSlip(betSlip.filter(b => b.id !== betId));
+    };
+
+    const handleClearBets = () => {
+        setBetSlip([]);
+    };
 
     // Simulate live updates every 10 seconds
     useEffect(() => {
@@ -200,7 +222,7 @@ export function MatchPage() {
                             <h2 className="text-[11px] font-bold text-gray-900 mb-4 uppercase tracking-[0.14em]">
                                 📊 Tous les paris disponibles
                             </h2>
-                            <MarketGrid markets={markets} />
+                            <MarketGrid markets={markets} onAddToBet={handleAddToBet} />
                         </div>
                     </div>
 
@@ -210,6 +232,9 @@ export function MatchPage() {
                     </div>
                 </div>
             </main>
+
+            {/* Bet Slip */}
+            <BetSlip bets={betSlip} onRemove={handleRemoveBet} onClear={handleClearBets} />
 
             {/* Footer */}
             <footer className="border-t border-betclic-grayBorder mt-8 py-6 px-4 text-center text-xs text-betclic-grayText bg-[#FAFAFB]">

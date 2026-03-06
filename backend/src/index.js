@@ -16,6 +16,7 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 const allowedOrigins = [
     process.env.FRONTEND_URL,
+    "https://betclic-poc.onrender.com",
     "http://localhost:3000",
     "http://localhost:3001",
     "http://127.0.0.1:3000",

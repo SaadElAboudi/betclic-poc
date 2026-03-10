@@ -12,6 +12,7 @@ import {
     getPersonalizedRecommendations,
     generateExplanation,
     getUserBettingStats,
+    computeRiskSignal,
 } from "../services/recommendationEngine.js";
 
 const router = express.Router();
@@ -82,7 +83,19 @@ router.get("/users/:userId/events/:eventId/recommendations", (req, res) => {
         explanation: generateExplanation(rec.reasons),
     }));
 
-    res.json(enrichedRecommendations);
+    const riskSignal = computeRiskSignal(user);
+
+    res.json({ recommendations: enrichedRecommendations, riskSignal });
+});
+
+// Get risk signal for a user
+router.get("/users/:userId/risk", (req, res) => {
+    const user = getUserById(req.params.userId);
+    if (!user) {
+        return res.status(404).json({ error: "User not found" });
+    }
+    const signal = computeRiskSignal(user);
+    res.json(signal);
 });
 
 // Get user betting statistics

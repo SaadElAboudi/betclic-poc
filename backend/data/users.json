@@ -33,7 +33,14 @@
                 }
             ],
             "winRate": 0.45,
-            "totalBets": 31
+            "totalBets": 31,
+            "session": {
+                "sessionBets": 2,
+                "lossStreak": 0,
+                "sessionDurationMinutes": 12,
+                "avgStakeLastSession": 10,
+                "avgStakeBaseline": 10
+            }
         },
         {
             "userId": "USR002",
@@ -74,7 +81,14 @@
                 }
             ],
             "winRate": 0.52,
-            "totalBets": 83
+            "totalBets": 83,
+            "session": {
+                "sessionBets": 6,
+                "lossStreak": 3,
+                "sessionDurationMinutes": 54,
+                "avgStakeLastSession": 45,
+                "avgStakeBaseline": 25
+            }
         },
         {
             "userId": "USR003",
@@ -114,7 +128,14 @@
                 }
             ],
             "winRate": 0.48,
-            "totalBets": 95
+            "totalBets": 95,
+            "session": {
+                "sessionBets": 4,
+                "lossStreak": 1,
+                "sessionDurationMinutes": 28,
+                "avgStakeLastSession": 20,
+                "avgStakeBaseline": 15
+            }
         }
     ]
 }

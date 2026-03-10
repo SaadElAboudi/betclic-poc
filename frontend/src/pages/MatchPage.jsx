@@ -6,6 +6,7 @@ import { MarketGrid } from '../components/MarketGrid';
 import { RecommendationPanel } from '../components/RecommendationPanel';
 import { UserProfileSelector } from '../components/UserProfileSelector';
 import { BetSlip } from '../components/BetSlip';
+import RiskSignal from '../components/RiskSignal';
 
 export function MatchPage() {
     const { selectedUserId, setUsers } = useUser();
@@ -13,6 +14,7 @@ export function MatchPage() {
     const [events, setEvents] = useState([]);
     const [markets, setMarkets] = useState({});
     const [recommendations, setRecommendations] = useState([]);
+    const [riskSignal, setRiskSignal] = useState(null);
     const [users, setUsersState] = useState([]);
     const [loading, setLoading] = useState(true);
     const [recLoading, setRecLoading] = useState(false);
@@ -56,7 +58,10 @@ export function MatchPage() {
                 const recsData = await apiClient.get(
                     `/users/${selectedUserId}/events/${currentEvent.eventId}/recommendations`
                 );
-                setRecommendations(recsData);
+                // API now returns { recommendations, riskSignal }
+                const recs = recsData.recommendations || recsData;
+                setRecommendations(Array.isArray(recs) ? recs : []);
+                setRiskSignal(recsData.riskSignal || null);
             } catch (err) {
                 console.error('Failed to load recommendations:', err);
                 setRecommendations([]);
@@ -232,10 +237,12 @@ export function MatchPage() {
 
                     {/* Right Column - Recommendations Sidebar */}
                     <div className="lg:col-span-1">
+                        <RiskSignal riskSignal={riskSignal} />
                         <RecommendationPanel
                             recommendations={recommendations}
                             loading={recLoading}
                             onAddToBet={handleAddToBet}
+                            riskSignal={riskSignal}
                         />
                     </div>
                 </div>

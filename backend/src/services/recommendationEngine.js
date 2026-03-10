@@ -1,3 +1,59 @@
+// ────────────────────────────────────────────────────────────────────
+// RESPONSIBLE GAMING: compute a risk signal from session behaviour
+// ────────────────────────────────────────────────────────────────────
+export function computeRiskSignal(user) {
+    const session = user.session || {};
+    const sessionBets = session.sessionBets || 0;
+    const lossStreak = session.lossStreak || 0;
+    const durationMinutes = session.sessionDurationMinutes || 0;
+    const avgStakeLast = session.avgStakeLastSession || 0;
+    const avgStakeBaseline = session.avgStakeBaseline || avgStakeLast || 1;
+    const stakeIncrease = avgStakeBaseline > 0
+        ? ((avgStakeLast - avgStakeBaseline) / avgStakeBaseline) * 100
+        : 0;
+
+    let riskScore = 0;
+
+    // Loss streak signal
+    if (lossStreak >= 3) riskScore += 40;
+    else if (lossStreak >= 2) riskScore += 20;
+    else if (lossStreak >= 1) riskScore += 8;
+
+    // Session bet volume
+    if (sessionBets >= 6) riskScore += 30;
+    else if (sessionBets >= 4) riskScore += 15;
+    else if (sessionBets >= 3) riskScore += 8;
+
+    // Sudden stake increase
+    if (stakeIncrease >= 50) riskScore += 25;
+    else if (stakeIncrease >= 25) riskScore += 12;
+
+    // Long session
+    if (durationMinutes >= 60) riskScore += 15;
+    else if (durationMinutes >= 30) riskScore += 8;
+
+    let level;
+    if (riskScore >= 60) level = "high";
+    else if (riskScore >= 30) level = "elevated";
+    else level = "normal";
+
+    // Session activity label
+    let sessionActivity;
+    if (sessionBets >= 5 || durationMinutes >= 45) sessionActivity = "High";
+    else if (sessionBets >= 3 || durationMinutes >= 20) sessionActivity = "Medium";
+    else sessionActivity = "Low";
+
+    return {
+        level,
+        sessionActivity,
+        sessionBets,
+        lossStreak,
+        sessionDurationMinutes: durationMinutes,
+        stakeIncreasePct: Math.round(stakeIncrease),
+        riskScore,
+    };
+}
+
 // Recommendation scoring logic based on user preferences and live match context
 export function getPersonalizedRecommendations(user, event, markets) {
     if (!user || !event || !markets) {
@@ -105,22 +161,75 @@ export function getPersonalizedRecommendations(user, event, markets) {
         return { ...market, score, reasons, tags: Array.from(tags), selectedOption };
     });
 
-    const topRecommendations = scoredMarkets
-        .filter((m) => m.score > 0)
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 4);
+    // ── Responsible Gaming: compute risk signal and adapt output ──────
+    const riskSignal = computeRiskSignal(user);
 
-    return topRecommendations.map((rec) => ({
-        marketId: rec.marketId,
-        type: rec.type,
-        name: rec.name,
-        options: rec.options,
-        selectedOption: rec.selectedOption,
-        reasons: rec.reasons,
-        tags: rec.tags,
-        score: Math.min(rec.score, MAX_SCORE),
-        normalizedScore: Math.round((Math.min(rec.score, MAX_SCORE) / MAX_SCORE) * 100),
-    }));
+    // Safe market types to promote under high / elevated risk
+    const SAFE_MARKET_TYPES = new Set(["match_winner", "double_chance", "both_teams_score"]);
+
+    let sorted = scoredMarkets
+        .filter((m) => m.score > 0)
+        .sort((a, b) => b.score - a.score);
+
+    let topCount = 4; // default
+
+    if (riskSignal.level === "high") {
+        // Only safe, low-complexity markets — cap at 2
+        sorted = sorted.filter((m) => SAFE_MARKET_TYPES.has(m.type));
+        topCount = 2;
+    } else if (riskSignal.level === "elevated") {
+        // Soft cap at 3 + prioritise safe markets
+        topCount = 3;
+        const safe = sorted.filter((m) => SAFE_MARKET_TYPES.has(m.type));
+        const rest = sorted.filter((m) => !SAFE_MARKET_TYPES.has(m.type));
+        sorted = [...safe, ...rest];
+    }
+
+    const topRecommendations = sorted.slice(0, topCount);
+
+    // Build explainability factors per recommendation
+    function buildExplainabilityFactors(rec, signal) {
+        const factors = [];
+        if (user.preferredMarkets?.includes(rec.type)) {
+            factors.push("Basé sur vos marchés favoris");
+        }
+        if (rec.tags.includes("Match chaud") || rec.tags.includes("Live") || rec.tags.includes("Fin de match")) {
+            factors.push("Contexte live du match");
+        }
+        if (signal.level !== "normal") {
+            factors.push("Ajustement jeu responsable");
+        }
+        if (factors.length === 0) {
+            factors.push("Pertinent selon votre profil");
+        }
+        return factors;
+    }
+
+    return topRecommendations.map((rec) => {
+        // Inject a responsible gaming tag & reason when risk is high/elevated
+        const adjustedTags = [...rec.tags];
+        const adjustedReasons = [...rec.reasons];
+        if (riskSignal.level === "high") {
+            if (!adjustedTags.includes("Jeu responsable")) adjustedTags.push("Jeu responsable");
+            adjustedReasons.unshift("Sélection adaptée à votre session — pari simple recommandé.");
+        } else if (riskSignal.level === "elevated") {
+            if (!adjustedTags.includes("Jeu responsable")) adjustedTags.push("Jeu responsable");
+            adjustedReasons.unshift("Pari conseillé compte tenu de votre activité récente.");
+        }
+
+        return {
+            marketId: rec.marketId,
+            type: rec.type,
+            name: rec.name,
+            options: rec.options,
+            selectedOption: rec.selectedOption,
+            reasons: adjustedReasons,
+            tags: adjustedTags,
+            score: Math.min(rec.score, MAX_SCORE),
+            normalizedScore: Math.round((Math.min(rec.score, MAX_SCORE) / MAX_SCORE) * 100),
+            explainability: buildExplainabilityFactors(rec, riskSignal),
+        };
+    });
 }
 
 function pickBestOption(market, event) {

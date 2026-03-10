@@ -43,16 +43,15 @@ export function MarketGrid({ markets, event, onAddToBet, recommendedMarketIds = 
         return (
             <div
                 key={market.marketId}
-                className={`bg-white border rounded-lg p-3 shadow-sm hover:shadow-md transition ${
-                    isRecommended ? 'border-betclic-red/60' : 'border-betclic-grayBorder'
-                }`}
+                className={`bg-white border rounded-lg p-3 shadow-sm hover:shadow-md transition ${isRecommended ? 'border-betclic-red/60' : 'border-betclic-grayBorder'
+                    }`}
             >
                 <div className="flex items-center justify-between gap-2 mb-2.5">
                     <div className="flex items-center gap-2">
-                    {market.icon && <span className="text-base">{market.icon}</span>}
-                    <div className="text-[11px] text-betclic-grayText uppercase tracking-wider font-bold">
-                        {market.name}
-                    </div>
+                        {market.icon && <span className="text-base">{market.icon}</span>}
+                        <div className="text-[11px] text-betclic-grayText uppercase tracking-wider font-bold">
+                            {market.name}
+                        </div>
                     </div>
                     {isRecommended && (
                         <span className="text-[10px] px-2 py-0.5 rounded bg-betclic-red text-white font-semibold">
@@ -61,8 +60,8 @@ export function MarketGrid({ markets, event, onAddToBet, recommendedMarketIds = 
                     )}
                 </div>
                 <div className={`grid gap-2 ${isThreeWay ? 'grid-cols-3' :
-                        isGrid ? 'grid-cols-2' :
-                            'grid-cols-2'
+                    isGrid ? 'grid-cols-2' :
+                        'grid-cols-2'
                     }`}>
                     {market.options.map((option) => (
                         <button
@@ -147,8 +146,8 @@ export function MarketGrid({ markets, event, onAddToBet, recommendedMarketIds = 
                                     setExpandedSections(new Set([category.id]));
                                 }}
                                 className={`flex-1 min-w-[100px] px-3 py-3 text-xs font-bold uppercase tracking-wide transition border-b-2 whitespace-nowrap ${activeTab === category.id
-                                        ? 'border-betclic-red text-betclic-red bg-red-50'
-                                        : 'border-transparent text-betclic-grayText hover:bg-gray-50'
+                                    ? 'border-betclic-red text-betclic-red bg-red-50'
+                                    : 'border-transparent text-betclic-grayText hover:bg-gray-50'
                                     }`}
                             >
                                 <div className="flex items-center justify-center gap-1.5">

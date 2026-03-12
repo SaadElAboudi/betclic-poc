@@ -54,6 +54,63 @@ export function computeRiskSignal(user) {
     };
 }
 
+
+
+export function buildScenarioFlags(user, event, markets, riskSignal = null) {
+    if (!user || !event) {
+        return [];
+    }
+
+    const minute = event.minute || 0;
+    const homeScore = event.homeScore || 0;
+    const awayScore = event.awayScore || 0;
+    const totalGoals = homeScore + awayScore;
+    const totalShots = (event.stats?.shots?.home || 0) + (event.stats?.shots?.away || 0);
+    const totalShotsOnTarget =
+        (event.stats?.shotsOnTarget?.home || 0) + (event.stats?.shotsOnTarget?.away || 0);
+    const totalCorners = (event.stats?.corners?.home || 0) + (event.stats?.corners?.away || 0);
+
+    const signal = riskSignal || computeRiskSignal(user);
+    const marketCount = Object.keys(markets || {}).length;
+
+    const flags = [
+        {
+            key: 'time_phase',
+            label: minute >= 70 ? 'Fin de match' : minute >= 30 ? 'Milieu de match' : 'Début de match',
+            severity: 'info',
+        },
+        {
+            key: 'score_state',
+            label: homeScore === awayScore ? 'Score serré' : 'Écart au score',
+            severity: 'info',
+        },
+    ];
+
+    if (totalShotsOnTarget >= 7 || totalShots >= 18) {
+        flags.push({ key: 'high_pace', label: 'Rythme élevé', severity: 'hot' });
+    }
+
+    if (totalGoals >= 3) {
+        flags.push({ key: 'goal_rich', label: 'Match riche en buts', severity: 'hot' });
+    }
+
+    if (totalCorners >= 8) {
+        flags.push({ key: 'corner_pressure', label: 'Forte pression corners', severity: 'info' });
+    }
+
+    if (signal.level !== 'normal') {
+        flags.push({ key: 'responsible_gaming', label: 'Mode jeu responsable', severity: 'safe' });
+    }
+
+    if (marketCount <= 3) {
+        flags.push({ key: 'market_depth_low', label: 'Profondeur marché réduite', severity: 'warn' });
+    } else {
+        flags.push({ key: 'market_depth_ok', label: `Largeur offre: ${marketCount} marchés`, severity: 'info' });
+    }
+
+    return flags.slice(0, 6);
+}
+
 // Recommendation scoring logic based on user preferences and live match context
 export function getPersonalizedRecommendations(user, event, markets) {
     if (!user || !event || !markets) {

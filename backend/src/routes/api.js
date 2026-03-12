@@ -13,6 +13,7 @@ import {
     generateExplanation,
     getUserBettingStats,
     computeRiskSignal,
+    buildScenarioFlags,
 } from "../services/recommendationEngine.js";
 
 const router = express.Router();
@@ -84,8 +85,9 @@ router.get("/users/:userId/events/:eventId/recommendations", (req, res) => {
     }));
 
     const riskSignal = computeRiskSignal(user);
+    const scenarioFlags = buildScenarioFlags(user, event, markets, riskSignal);
 
-    res.json({ recommendations: enrichedRecommendations, riskSignal });
+    res.json({ recommendations: enrichedRecommendations, riskSignal, scenarioFlags });
 });
 
 // Get risk signal for a user

@@ -76,7 +76,13 @@ router.get("/users/:userId/events/:eventId/recommendations", (req, res) => {
         return res.status(404).json({ error: "User or event not found" });
     }
 
-    const recommendations = getPersonalizedRecommendations(user, event, markets);
+    const mode = ["adaptive", "balanced", "strict"].includes(req.query.mode)
+        ? req.query.mode
+        : "adaptive";
+    const topNRaw = Number.parseInt(req.query.topN, 10);
+    const topN = Number.isFinite(topNRaw) ? topNRaw : null;
+
+    const recommendations = getPersonalizedRecommendations(user, event, markets, { mode, topN });
 
     // Enrich recommendations with explanations
     const enrichedRecommendations = recommendations.map((rec) => ({
@@ -87,7 +93,7 @@ router.get("/users/:userId/events/:eventId/recommendations", (req, res) => {
     const riskSignal = computeRiskSignal(user);
     const scenarioFlags = buildScenarioFlags(user, event, markets, riskSignal);
 
-    res.json({ recommendations: enrichedRecommendations, riskSignal, scenarioFlags });
+    res.json({ recommendations: enrichedRecommendations, riskSignal, scenarioFlags, mode, topN });
 });
 
 // Get risk signal for a user

@@ -20,6 +20,8 @@ export function MatchPage() {
     const [loading, setLoading] = useState(true);
     const [recLoading, setRecLoading] = useState(false);
     const [betSlip, setBetSlip] = useState([]);
+    const [recommendationMode, setRecommendationMode] = useState('adaptive');
+    const [recommendationVolume, setRecommendationVolume] = useState(4);
 
     const selectedUser = users.find((user) => user.userId === selectedUserId) || null;
 
@@ -53,8 +55,12 @@ export function MatchPage() {
         const loadRecommendations = async () => {
             setRecLoading(true);
             try {
+                const query = new URLSearchParams({
+                    mode: recommendationMode,
+                    topN: String(recommendationVolume),
+                });
                 const recsData = await apiClient.get(
-                    `/users/${selectedUserId}/events/${currentEvent.eventId}/recommendations`
+                    `/users/${selectedUserId}/events/${currentEvent.eventId}/recommendations?${query.toString()}`
                 );
                 const recs = recsData.recommendations || recsData;
                 setRecommendations(Array.isArray(recs) ? recs : []);
@@ -70,7 +76,7 @@ export function MatchPage() {
         };
 
         loadRecommendations();
-    }, [currentEvent, selectedUserId]);
+    }, [currentEvent, selectedUserId, recommendationMode, recommendationVolume]);
 
     const handleAddToBet = (bet) => {
         if (betSlip.some(b => b.id === bet.id)) {
@@ -133,6 +139,39 @@ export function MatchPage() {
 
             <main className="max-w-7xl mx-auto px-4 py-6 space-y-4">
                 <UserProfileSelector users={users} onUserChange={() => { }} />
+
+
+                <div className="bg-[#1A1F28] border border-white/10 rounded-md p-4 shadow-sm">
+                    <h3 className="text-[11px] font-bold text-white/90 mb-3 uppercase tracking-[0.14em]">Configuration recommandations</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                            <label className="text-[11px] text-white/60 mb-1 block">Mode</label>
+                            <select
+                                value={recommendationMode}
+                                onChange={(e) => setRecommendationMode(e.target.value)}
+                                className="w-full bg-[#232A36] border border-white/15 rounded px-3 py-2 text-sm text-white"
+                            >
+                                <option value="adaptive">Adaptive (selon risque)</option>
+                                <option value="balanced">Balanced (safe prioritaire)</option>
+                                <option value="strict">Strict (marchés simples)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="text-[11px] text-white/60 mb-1 block">Volume de suggestions</label>
+                            <select
+                                value={recommendationVolume}
+                                onChange={(e) => setRecommendationVolume(Number(e.target.value))}
+                                className="w-full bg-[#232A36] border border-white/15 rounded px-3 py-2 text-sm text-white"
+                            >
+                                <option value={2}>2</option>
+                                <option value={3}>3</option>
+                                <option value={4}>4</option>
+                                <option value={5}>5</option>
+                                <option value={6}>6</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
 
                 {events.length > 1 && (
                     <div className="bg-[#1A1F28] border border-white/10 rounded-md p-4 shadow-sm">

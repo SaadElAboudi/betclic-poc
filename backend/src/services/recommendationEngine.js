@@ -112,10 +112,13 @@ export function buildScenarioFlags(user, event, markets, riskSignal = null) {
 }
 
 // Recommendation scoring logic based on user preferences and live match context
-export function getPersonalizedRecommendations(user, event, markets) {
+export function getPersonalizedRecommendations(user, event, markets, options = {}) {
     if (!user || !event || !markets) {
         return [];
     }
+
+    const recommendationMode = options.mode || "adaptive";
+    const requestedTopN = Number.isFinite(options.topN) ? options.topN : null;
 
     const MAX_SCORE = 140;
     const totalGoals = (event.homeScore || 0) + (event.awayScore || 0);
@@ -230,16 +233,30 @@ export function getPersonalizedRecommendations(user, event, markets) {
 
     let topCount = 4; // default
 
-    if (riskSignal.level === "high") {
-        // Only safe, low-complexity markets — cap at 2
+    if (recommendationMode === "strict") {
         sorted = sorted.filter((m) => SAFE_MARKET_TYPES.has(m.type));
-        topCount = 2;
-    } else if (riskSignal.level === "elevated") {
-        // Soft cap at 3 + prioritise safe markets
-        topCount = 3;
+        topCount = Math.min(topCount, 2);
+    } else if (recommendationMode === "balanced") {
         const safe = sorted.filter((m) => SAFE_MARKET_TYPES.has(m.type));
         const rest = sorted.filter((m) => !SAFE_MARKET_TYPES.has(m.type));
         sorted = [...safe, ...rest];
+        topCount = Math.min(topCount, 3);
+    } else if (recommendationMode === "adaptive") {
+        if (riskSignal.level === "high") {
+            // Only safe, low-complexity markets — cap at 2
+            sorted = sorted.filter((m) => SAFE_MARKET_TYPES.has(m.type));
+            topCount = 2;
+        } else if (riskSignal.level === "elevated") {
+            // Soft cap at 3 + prioritise safe markets
+            topCount = 3;
+            const safe = sorted.filter((m) => SAFE_MARKET_TYPES.has(m.type));
+            const rest = sorted.filter((m) => !SAFE_MARKET_TYPES.has(m.type));
+            sorted = [...safe, ...rest];
+        }
+    }
+
+    if (Number.isFinite(requestedTopN)) {
+        topCount = Math.min(6, Math.max(1, Math.trunc(requestedTopN)));
     }
 
     const topRecommendations = sorted.slice(0, topCount);

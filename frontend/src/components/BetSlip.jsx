@@ -37,6 +37,11 @@ export function BetSlip({ bets, onRemove, onClear, user, riskSignal }) {
                         {riskLevel !== 'normal' && (
                             <span className="bg-yellow-100 text-yellow-800 text-[10px] font-bold px-2 py-0.5 rounded border border-yellow-300 uppercase tracking-wide">Mode prudent</span>
                         )}
+                        {riskLevel !== 'normal' && (
+                            <span className="bg-yellow-100 text-yellow-800 text-[10px] font-bold px-2 py-0.5 rounded border border-yellow-300 uppercase tracking-wide">
+                                Mode prudent
+                            </span>
+                        )}
                     </div>
                     <button onClick={onClear} className="text-xs text-betclic-red font-semibold hover:underline">Tout supprimer</button>
                 </div>

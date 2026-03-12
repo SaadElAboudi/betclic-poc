@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { apiClient } from '../lib/api';
 import { useUser } from '../context/UserContext';
 import { LiveStats } from '../components/LiveStats';
@@ -7,6 +7,25 @@ import { RecommendationPanel } from '../components/RecommendationPanel';
 import { UserProfileSelector } from '../components/UserProfileSelector';
 import { BetSlip } from '../components/BetSlip';
 import RiskSignal from '../components/RiskSignal';
+
+const NAV_ITEMS = [
+    { id: 'home', label: 'Accueil' },
+    { id: 'live', label: 'Live' },
+    { id: 'sports', label: 'Sports' },
+    { id: 'competitions', label: 'Compétitions' },
+    { id: 'bets', label: 'Paris sportifs' },
+];
+
+const DEFAULT_FILTERS = { sport: 'all', league: 'all', team: '' };
+
+function getInitialState(key, fallback) {
+    try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+    } catch {
+        return fallback;
+    }
+}
 
 export function MatchPage() {
     const { selectedUserId, setUsers } = useUser();
@@ -22,8 +41,17 @@ export function MatchPage() {
     const [betSlip, setBetSlip] = useState([]);
     const [recommendationMode, setRecommendationMode] = useState('adaptive');
     const [recommendationVolume, setRecommendationVolume] = useState(4);
+    const [nav, setNav] = useState('home');
+
+    const [filters, setFilters] = useState(() => getInitialState('betclic_filters', DEFAULT_FILTERS));
+    const [favoriteTeams, setFavoriteTeams] = useState(() => getInitialState('betclic_favorite_teams', []));
+    const [favoriteMarketTypes, setFavoriteMarketTypes] = useState(() => getInitialState('betclic_favorite_market_types', []));
 
     const selectedUser = users.find((user) => user.userId === selectedUserId) || null;
+
+    useEffect(() => { localStorage.setItem('betclic_filters', JSON.stringify(filters)); }, [filters]);
+    useEffect(() => { localStorage.setItem('betclic_favorite_teams', JSON.stringify(favoriteTeams)); }, [favoriteTeams]);
+    useEffect(() => { localStorage.setItem('betclic_favorite_market_types', JSON.stringify(favoriteMarketTypes)); }, [favoriteMarketTypes]);
 
     useEffect(() => {
         const loadData = async () => {
@@ -34,7 +62,7 @@ export function MatchPage() {
 
                 const eventsData = await apiClient.get('/events');
                 setEvents(eventsData);
-                const liveEvent = eventsData.find(e => e.status === 'live') || eventsData[0];
+                const liveEvent = eventsData.find((e) => e.status === 'live') || eventsData[0];
                 setCurrentEvent(liveEvent);
 
                 const marketsData = await apiClient.get(`/events/${liveEvent.eventId}/markets`);
@@ -78,17 +106,6 @@ export function MatchPage() {
         loadRecommendations();
     }, [currentEvent, selectedUserId, recommendationMode, recommendationVolume]);
 
-    const handleAddToBet = (bet) => {
-        if (betSlip.some(b => b.id === bet.id)) {
-            setBetSlip(betSlip.filter(b => b.id !== bet.id));
-        } else {
-            setBetSlip([...betSlip, bet]);
-        }
-    };
-
-    const handleRemoveBet = (betId) => setBetSlip(betSlip.filter(b => b.id !== betId));
-    const handleClearBets = () => setBetSlip([]);
-
     useEffect(() => {
         if (!currentEvent || currentEvent.status !== 'live') return;
 
@@ -104,8 +121,30 @@ export function MatchPage() {
         return () => clearInterval(interval);
     }, [currentEvent]);
 
+    const filteredEvents = useMemo(() => events.filter((event) => {
+        if (filters.sport !== 'all' && event.sport !== filters.sport) return false;
+        if (filters.league !== 'all' && event.league !== filters.league) return false;
+        if (filters.team && !`${event.homeTeam} ${event.awayTeam}`.toLowerCase().includes(filters.team.toLowerCase())) return false;
+        return true;
+    }), [events, filters]);
+
+    const leagues = useMemo(() => [...new Set(events.map((e) => e.league))], [events]);
+    const sports = useMemo(() => [...new Set(events.map((e) => e.sport))], [events]);
+
+    const handleAddToBet = (bet) => {
+        if (betSlip.some((b) => b.id === bet.id)) {
+            setBetSlip(betSlip.filter((b) => b.id !== bet.id));
+        } else {
+            setBetSlip([...betSlip, bet]);
+        }
+    };
+
+    const handleRemoveBet = (betId) => setBetSlip(betSlip.filter((b) => b.id !== betId));
+    const handleClearBets = () => setBetSlip([]);
+
     const handleEventChange = async (eventId) => {
-        const event = events.find(e => e.eventId === eventId);
+        const event = events.find((e) => e.eventId === eventId);
+        if (!event) return;
         setCurrentEvent(event);
         try {
             const marketsData = await apiClient.get(`/events/${eventId}/markets`);
@@ -113,6 +152,14 @@ export function MatchPage() {
         } catch (err) {
             console.error('Failed to load markets:', err);
         }
+    };
+
+    const toggleFavoriteTeam = (team) => {
+        setFavoriteTeams((prev) => prev.includes(team) ? prev.filter((t) => t !== team) : [...prev, team]);
+    };
+
+    const toggleFavoriteMarketType = (type) => {
+        setFavoriteMarketTypes((prev) => prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]);
     };
 
     if (loading) {
@@ -132,14 +179,52 @@ export function MatchPage() {
                         <span className="text-white/90 text-[11px] uppercase tracking-[0.16em] font-semibold">PARIS EN DIRECT</span>
                     </div>
                     <div className="text-white/95 text-[11px] uppercase tracking-[0.14em] font-semibold hidden sm:block">
-                        Expérience Live inspirée de Betclic.fr
+                        Prototype produit & expérience utilisateur avancée
                     </div>
                 </div>
             </header>
 
+            <div className="bg-[#171B23] border-b border-white/10">
+                <div className="max-w-7xl mx-auto px-4 flex gap-2 overflow-x-auto py-2 scrollbar-hide">
+                    {NAV_ITEMS.map((item) => (
+                        <button
+                            key={item.id}
+                            onClick={() => setNav(item.id)}
+                            className={`px-3 py-1.5 rounded text-xs font-semibold uppercase tracking-wide whitespace-nowrap ${nav === item.id ? 'bg-betclic-red text-white' : 'bg-[#232A36] text-white/70'}`}
+                        >
+                            {item.label}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
             <main className="max-w-7xl mx-auto px-4 py-6 space-y-4">
                 <UserProfileSelector users={users} onUserChange={() => { }} />
 
+                <div className="bg-[#1A1F28] border border-white/10 rounded-md p-4 shadow-sm">
+                    <h3 className="text-[11px] font-bold text-white/90 mb-3 uppercase tracking-[0.14em]">Filtres persistants (compétition / équipe / rencontre)</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <select value={filters.sport} onChange={(e) => setFilters((f) => ({ ...f, sport: e.target.value }))} className="bg-[#232A36] border border-white/15 rounded px-3 py-2 text-sm">
+                            <option value="all">Tous sports</option>
+                            {sports.map((sport) => <option key={sport} value={sport}>{sport}</option>)}
+                        </select>
+                        <select value={filters.league} onChange={(e) => setFilters((f) => ({ ...f, league: e.target.value }))} className="bg-[#232A36] border border-white/15 rounded px-3 py-2 text-sm">
+                            <option value="all">Toutes compétitions</option>
+                            {leagues.map((league) => <option key={league} value={league}>{league}</option>)}
+                        </select>
+                        <input value={filters.team} onChange={(e) => setFilters((f) => ({ ...f, team: e.target.value }))} placeholder="Rechercher équipe" className="bg-[#232A36] border border-white/15 rounded px-3 py-2 text-sm" />
+                        <button onClick={() => setFilters(DEFAULT_FILTERS)} className="bg-[#232A36] border border-white/15 rounded px-3 py-2 text-sm">Réinitialiser</button>
+                    </div>
+                </div>
+
+                <div className="bg-[#1A1F28] border border-white/10 rounded-md p-4 shadow-sm">
+                    <h3 className="text-[11px] font-bold text-white/90 mb-3 uppercase tracking-[0.14em]">Bonus / promotions</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                        <div className="bg-[#232A36] border border-white/10 rounded p-3">🎁 Freebet 10€ dès 50€ de dépôt</div>
+                        <div className="bg-[#232A36] border border-white/10 rounded p-3">⚡ Boost de cote +15% sur 1 combiné / jour</div>
+                        <div className="bg-[#232A36] border border-white/10 rounded p-3">🏆 Mission: 3 paris live cette semaine = bonus</div>
+                    </div>
+                </div>
 
                 <div className="bg-[#1A1F28] border border-white/10 rounded-md p-4 shadow-sm">
                     <h3 className="text-[11px] font-bold text-white/90 mb-3 uppercase tracking-[0.14em]">Configuration recommandations</h3>
@@ -173,11 +258,11 @@ export function MatchPage() {
                     </div>
                 </div>
 
-                {events.length > 1 && (
+                {filteredEvents.length > 0 && (
                     <div className="bg-[#1A1F28] border border-white/10 rounded-md p-4 shadow-sm">
-                        <h3 className="text-[11px] font-bold text-white/90 mb-3 uppercase tracking-[0.14em]">Autres matchs</h3>
+                        <h3 className="text-[11px] font-bold text-white/90 mb-3 uppercase tracking-[0.14em]">Rencontres filtrées</h3>
                         <div className="flex flex-wrap gap-2">
-                            {events.map((event) => (
+                            {filteredEvents.map((event) => (
                                 <button
                                     key={event.eventId}
                                     onClick={() => handleEventChange(event.eventId)}
@@ -210,17 +295,45 @@ export function MatchPage() {
 
                                     <div className="flex items-center justify-around gap-4">
                                         <div className="flex-1 text-center">
-                                            <div className="text-xs text-white/65 uppercase tracking-wide font-semibold mb-2">{currentEvent.homeTeam}</div>
+                                            <div className="text-xs text-white/65 uppercase tracking-wide font-semibold mb-2">
+                                                {currentEvent.homeTeam}
+                                                <button onClick={() => toggleFavoriteTeam(currentEvent.homeTeam)} className="ml-2 text-betclic-yellow">{favoriteTeams.includes(currentEvent.homeTeam) ? '★' : '☆'}</button>
+                                            </div>
                                             <div className="text-6xl font-black text-white leading-none">{currentEvent.homeScore}</div>
                                         </div>
                                         <div className="text-center flex-shrink-0"><div className="text-3xl font-bold text-white/40">-</div></div>
                                         <div className="flex-1 text-center">
-                                            <div className="text-xs text-white/65 uppercase tracking-wide font-semibold mb-2">{currentEvent.awayTeam}</div>
+                                            <div className="text-xs text-white/65 uppercase tracking-wide font-semibold mb-2">
+                                                {currentEvent.awayTeam}
+                                                <button onClick={() => toggleFavoriteTeam(currentEvent.awayTeam)} className="ml-2 text-betclic-yellow">{favoriteTeams.includes(currentEvent.awayTeam) ? '★' : '☆'}</button>
+                                            </div>
                                             <div className="text-6xl font-black text-white leading-none">{currentEvent.awayScore}</div>
                                         </div>
                                     </div>
                                 </div>
                             )}
+                        </div>
+
+                        <div className="bg-[#1A1F28] border border-white/10 rounded-md p-4 shadow-sm">
+                            <h3 className="text-[11px] font-bold text-white/90 mb-3 uppercase tracking-[0.14em]">Fiche match enrichie</h3>
+                            <div className="grid md:grid-cols-3 gap-3 text-xs">
+                                <div className="bg-[#232A36] border border-white/10 rounded p-3">
+                                    <div className="text-white/60 uppercase mb-1">Timeline</div>
+                                    <ul className="space-y-1 text-white/80">
+                                        <li>{currentEvent?.minute}' Pression offensive</li>
+                                        <li>{Math.max(1, (currentEvent?.minute || 45) - 14)}' But potentiel (xG élevé)</li>
+                                        <li>{Math.max(1, (currentEvent?.minute || 45) - 29)}' Carton / faute clé</li>
+                                    </ul>
+                                </div>
+                                <div className="bg-[#232A36] border border-white/10 rounded p-3">
+                                    <div className="text-white/60 uppercase mb-1">Compositions (mock)</div>
+                                    <div className="text-white/80">4-3-3 vs 4-2-3-1 • Joueurs clés surveillés</div>
+                                </div>
+                                <div className="bg-[#232A36] border border-white/10 rounded p-3">
+                                    <div className="text-white/60 uppercase mb-1">H2H (mock)</div>
+                                    <div className="text-white/80">5 derniers matchs: 2V - 2N - 1D</div>
+                                </div>
+                            </div>
                         </div>
 
                         <LiveStats event={currentEvent} />
@@ -232,6 +345,8 @@ export function MatchPage() {
                                 event={currentEvent}
                                 onAddToBet={handleAddToBet}
                                 recommendedMarketIds={recommendations.map((rec) => rec.marketId)}
+                                favoriteMarketTypes={favoriteMarketTypes}
+                                onToggleFavoriteMarketType={toggleFavoriteMarketType}
                             />
                         </div>
                     </div>
@@ -253,6 +368,7 @@ export function MatchPage() {
                 bets={betSlip}
                 user={selectedUser}
                 riskSignal={riskSignal}
+                markets={markets}
                 onRemove={handleRemoveBet}
                 onClear={handleClearBets}
             />

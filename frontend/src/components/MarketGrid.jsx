@@ -1,7 +1,14 @@
 import { useState } from 'react';
 import { formatOdds } from '../lib/api';
 
-export function MarketGrid({ markets, event, onAddToBet, recommendedMarketIds = [] }) {
+export function MarketGrid({
+    markets,
+    event,
+    onAddToBet,
+    recommendedMarketIds = [],
+    favoriteMarketTypes = [],
+    onToggleFavoriteMarketType,
+}) {
     const [activeTab, setActiveTab] = useState('popular');
 
     if (!markets || Object.keys(markets).length === 0) {
@@ -20,13 +27,14 @@ export function MarketGrid({ markets, event, onAddToBet, recommendedMarketIds = 
         { id: 'goals', label: 'Buts', icon: '⚽' },
         { id: 'results', label: 'Résultats', icon: '🏆' },
         { id: 'stats', label: 'Statistiques', icon: '📊' },
-        { id: 'handicap', label: 'Handicap', icon: '⚖️' }
+        { id: 'handicap', label: 'Handicap', icon: '⚖️' },
     ];
 
     const currentCategoryMarkets = sortMarketsByPertinence(
         groupedMarkets[activeTab] || [],
         event,
-        recommendedMarketIds
+        recommendedMarketIds,
+        favoriteMarketTypes
     );
 
     return (
@@ -61,6 +69,7 @@ export function MarketGrid({ markets, event, onAddToBet, recommendedMarketIds = 
                     const isThreeWay = market.options.length === 3 && market.type === 'match_winner';
                     const isGrid = market.options.length > 3;
                     const isRecommended = recommendedMarketIds.includes(market.marketId);
+                    const isFavorite = favoriteMarketTypes.includes(market.type);
 
                     return (
                         <div
@@ -69,9 +78,17 @@ export function MarketGrid({ markets, event, onAddToBet, recommendedMarketIds = 
                         >
                             <div className="flex items-center justify-between gap-2 mb-2.5">
                                 <div className="text-[11px] text-white/70 uppercase tracking-wider font-bold">{market.name}</div>
-                                {isRecommended && (
-                                    <span className="text-[10px] px-2 py-0.5 rounded bg-betclic-red text-white font-semibold">Pour vous</span>
-                                )}
+                                <div className="flex items-center gap-1.5">
+                                    {isRecommended && (
+                                        <span className="text-[10px] px-2 py-0.5 rounded bg-betclic-red text-white font-semibold">Pour vous</span>
+                                    )}
+                                    <button
+                                        onClick={() => onToggleFavoriteMarketType?.(market.type)}
+                                        className={`text-xs px-2 py-0.5 rounded border ${isFavorite ? 'border-betclic-yellow text-betclic-yellow' : 'border-white/20 text-white/60'}`}
+                                    >
+                                        ★
+                                    </button>
+                                </div>
                             </div>
 
                             <div className={`grid gap-2 ${isThreeWay ? 'grid-cols-3' : isGrid ? 'grid-cols-2' : 'grid-cols-2'}`}>
@@ -80,9 +97,11 @@ export function MarketGrid({ markets, event, onAddToBet, recommendedMarketIds = 
                                         key={option.id}
                                         onClick={() => onAddToBet({
                                             id: option.id,
+                                            marketId: market.marketId,
+                                            marketType: market.type,
                                             market: market.name,
                                             selection: option.fullLabel || option.label,
-                                            odds: option.odds
+                                            odds: option.odds,
                                         })}
                                         className="bg-betclic-yellow hover:bg-betclic-yellowHover border border-betclic-yellow rounded-md p-2.5 transition active:scale-95"
                                     >
@@ -103,7 +122,7 @@ export function MarketGrid({ markets, event, onAddToBet, recommendedMarketIds = 
     );
 }
 
-function sortMarketsByPertinence(markets, event, recommendedMarketIds) {
+function sortMarketsByPertinence(markets, event, recommendedMarketIds, favoriteMarketTypes = []) {
     if (!Array.isArray(markets)) return [];
 
     const totalGoals = (event?.homeScore || 0) + (event?.awayScore || 0);
@@ -114,6 +133,7 @@ function sortMarketsByPertinence(markets, event, recommendedMarketIds) {
         let score = 0;
 
         if (recommendedMarketIds.includes(market.marketId)) score += 100;
+        if (favoriteMarketTypes.includes(market.type)) score += 40;
         if (market.category === 'popular') score += 30;
         if (market.type === 'next_goal' && (totalShots >= 14 || minute >= 60)) score += 20;
         if (market.type.startsWith('over_under_') && totalGoals >= 2) score += 18;

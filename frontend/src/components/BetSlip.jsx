@@ -26,7 +26,7 @@ function combinations(items, k) {
     return result;
 }
 
-export function BetSlip({ bets, onRemove, onClear, user, riskSignal, markets = {} }) {
+export function BetSlip({ bets, onRemove, onClear, user, riskSignal, markets = {}, onPlaceBet }) {
     const [stake, setStake] = useState('10');
     const [betType, setBetType] = useState('combine');
     const [cashoutHistory, setCashoutHistory] = useState([]);
@@ -214,6 +214,12 @@ export function BetSlip({ bets, onRemove, onClear, user, riskSignal, markets = {
 
                 <button
                     disabled={numericStake <= 0}
+                    onClick={() => onPlaceBet?.({
+                        selections: betsWithValidation,
+                        stake: safeStake,
+                        betType,
+                        potentialWin: selectedPotential,
+                    })}
                     className="w-full bg-betclic-yellow hover:bg-betclic-yellowHover disabled:opacity-50 disabled:cursor-not-allowed text-gray-900 font-bold py-3 rounded transition text-sm uppercase tracking-wide"
                 >
                     Placer le pari

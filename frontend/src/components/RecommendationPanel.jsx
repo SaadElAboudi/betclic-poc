@@ -60,7 +60,7 @@ function ScenarioCoverage({ scenarioFlags }) {
     );
 }
 
-export function RecommendationPanel({ recommendations, loading, onAddToBet, scenarioFlags }) {
+export function RecommendationPanel({ recommendations, loading, onAddToBet, scenarioFlags, onFeedback }) {
     if (loading) {
         return <div className="bg-[#1A1F28] border border-white/10 rounded-md p-4 shadow-sm text-white/70">Chargement...</div>;
     }
@@ -121,17 +121,23 @@ export function RecommendationPanel({ recommendations, loading, onAddToBet, scen
                                 <span className="text-betclic-yellow text-xs font-bold">{Math.min(rec.normalizedScore || 50, 100)}%</span>
                             </div>
 
-                            <button
-                                onClick={() => onAddToBet?.({
-                                    id: rec.selectedOption?.id || `${rec.marketId}-suggestion`,
-                                    market: rec.name,
-                                    selection: rec.selectedOption?.fullLabel || rec.selectedOption?.label || rec.options[0]?.label,
-                                    odds: rec.selectedOption?.odds || rec.options[0]?.odds,
-                                })}
-                                className="w-full bg-betclic-yellow hover:bg-betclic-yellowHover border border-betclic-yellow text-gray-900 font-bold py-2 rounded-md text-sm transition tracking-wide uppercase"
-                            >
-                                Ajouter au pari
-                            </button>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => onAddToBet?.({
+                                        id: rec.selectedOption?.id || `${rec.marketId}-suggestion`,
+                                        marketId: rec.marketId,
+                                        marketType: rec.type,
+                                        market: rec.name,
+                                        selection: rec.selectedOption?.fullLabel || rec.selectedOption?.label || rec.options[0]?.label,
+                                        odds: rec.selectedOption?.odds || rec.options[0]?.odds,
+                                    })}
+                                    className="flex-1 bg-betclic-yellow hover:bg-betclic-yellowHover border border-betclic-yellow text-gray-900 font-bold py-2 rounded-md text-sm transition tracking-wide uppercase"
+                                >
+                                    Ajouter au pari
+                                </button>
+                                <button onClick={() => onFeedback?.(rec.marketId, 'up')} className="px-2 py-2 rounded-md border border-white/20 text-green-300">👍</button>
+                                <button onClick={() => onFeedback?.(rec.marketId, 'down')} className="px-2 py-2 rounded-md border border-white/20 text-red-300">👎</button>
+                            </div>
                         </div>
                     );
                 })}

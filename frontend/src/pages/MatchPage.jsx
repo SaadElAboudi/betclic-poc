@@ -42,6 +42,8 @@ export function MatchPage() {
     const [recommendationMode, setRecommendationMode] = useState('adaptive');
     const [recommendationVolume, setRecommendationVolume] = useState(4);
     const [nav, setNav] = useState('home');
+    const [betHistory, setBetHistory] = useState([]);
+    const [feedbackStats, setFeedbackStats] = useState({ up: 0, down: 0, feedbackCount: 0 });
 
     const [filters, setFilters] = useState(() => getInitialState('betclic_filters', DEFAULT_FILTERS));
     const [favoriteTeams, setFavoriteTeams] = useState(() => getInitialState('betclic_favorite_teams', []));
@@ -76,6 +78,23 @@ export function MatchPage() {
 
         loadData();
     }, [setUsers]);
+
+
+    useEffect(() => {
+        if (!selectedUserId) return;
+
+        const loadBetHistory = async () => {
+            try {
+                const data = await apiClient.get(`/users/${selectedUserId}/bets`);
+                setBetHistory(Array.isArray(data.bets) ? data.bets : []);
+            } catch (err) {
+                console.error('Failed to load bet history:', err);
+                setBetHistory([]);
+            }
+        };
+
+        loadBetHistory();
+    }, [selectedUserId]);
 
     useEffect(() => {
         if (!currentEvent || !selectedUserId) return;
@@ -141,6 +160,39 @@ export function MatchPage() {
 
     const handleRemoveBet = (betId) => setBetSlip(betSlip.filter((b) => b.id !== betId));
     const handleClearBets = () => setBetSlip([]);
+
+    const handlePlaceBet = async ({ selections, stake, betType, potentialWin }) => {
+        if (!selectedUserId) return;
+        try {
+            const placed = await apiClient.post(`/users/${selectedUserId}/bets`, {
+                selections,
+                stake,
+                betType,
+                potentialWin,
+            });
+            setBetHistory((prev) => [placed, ...prev].slice(0, 20));
+            setBetSlip([]);
+        } catch (err) {
+            console.error('Failed to place bet:', err);
+        }
+    };
+
+    const handleRecommendationFeedback = async (marketId, action) => {
+        if (!selectedUserId || !currentEvent) return;
+        try {
+            const result = await apiClient.post(
+                `/users/${selectedUserId}/events/${currentEvent.eventId}/recommendation-feedback`,
+                { marketId, action }
+            );
+            setFeedbackStats({
+                up: result.sentiment?.up || 0,
+                down: result.sentiment?.down || 0,
+                feedbackCount: result.feedbackCount || 0,
+            });
+        } catch (err) {
+            console.error('Failed to send recommendation feedback:', err);
+        }
+    };
 
     const handleEventChange = async (eventId) => {
         const event = events.find((e) => e.eventId === eventId);
@@ -352,6 +404,40 @@ export function MatchPage() {
                     </div>
 
                     <div className="lg:col-span-1">
+
+                        <div className="bg-[#1A1F28] border border-white/10 rounded-md p-3 mb-4">
+                            <div className="text-[10px] uppercase tracking-[0.14em] text-white/60 mb-2">Engagement recommandations</div>
+                            <div className="grid grid-cols-3 gap-2 text-xs">
+                                <div className="bg-[#232A36] rounded p-2 border border-white/10 text-center">
+                                    <div className="text-green-300 font-bold">{feedbackStats.up}</div>
+                                    <div className="text-white/60">Likes</div>
+                                </div>
+                                <div className="bg-[#232A36] rounded p-2 border border-white/10 text-center">
+                                    <div className="text-red-300 font-bold">{feedbackStats.down}</div>
+                                    <div className="text-white/60">Dislikes</div>
+                                </div>
+                                <div className="bg-[#232A36] rounded p-2 border border-white/10 text-center">
+                                    <div className="text-betclic-yellow font-bold">{feedbackStats.feedbackCount}</div>
+                                    <div className="text-white/60">Total</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-[#1A1F28] border border-white/10 rounded-md p-3 mb-4">
+                            <div className="text-[10px] uppercase tracking-[0.14em] text-white/60 mb-2">Historique paris</div>
+                            <div className="space-y-2 max-h-40 overflow-y-auto">
+                                {betHistory.length === 0 && <div className="text-xs text-white/60">Aucun pari placé.</div>}
+                                {betHistory.slice(0, 6).map((bet) => (
+                                    <div key={bet.betId} className="text-xs bg-[#232A36] rounded border border-white/10 p-2">
+                                        <div className="flex justify-between">
+                                            <span className="text-white/80">{bet.betType} • {bet.selections?.length || 0} sélections</span>
+                                            <span className="text-green-300 font-semibold">{Number(bet.potentialWin || 0).toFixed(2)} €</span>
+                                        </div>
+                                        <div className="text-white/50 mt-0.5">{new Date(bet.createdAt).toLocaleString('fr-FR')}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                         <RiskSignal riskSignal={riskSignal} />
                         <RecommendationPanel
                             recommendations={recommendations}
@@ -359,6 +445,7 @@ export function MatchPage() {
                             onAddToBet={handleAddToBet}
                             riskSignal={riskSignal}
                             scenarioFlags={scenarioFlags}
+                            onFeedback={handleRecommendationFeedback}
                         />
                     </div>
                 </div>
@@ -371,6 +458,7 @@ export function MatchPage() {
                 markets={markets}
                 onRemove={handleRemoveBet}
                 onClear={handleClearBets}
+                onPlaceBet={handlePlaceBet}
             />
 
             <footer className="border-t border-white/10 mt-8 py-6 px-4 text-center text-xs text-white/60 bg-[#171B23]">

@@ -4,6 +4,13 @@ const TAG_STYLE = {
     'Jeu responsable': 'bg-green-100 text-green-700 border-green-200',
 };
 
+const SCENARIO_STYLE = {
+    hot: 'bg-red-900/35 text-red-100 border-red-400/40',
+    safe: 'bg-green-900/35 text-green-100 border-green-400/40',
+    warn: 'bg-yellow-900/30 text-yellow-100 border-yellow-400/40',
+    info: 'bg-white/5 text-white/80 border-white/15',
+};
+
 function ExplainabilityBlock({ factors, isRiskAdapted }) {
     if (!factors || factors.length === 0) return null;
     return (
@@ -29,7 +36,31 @@ function ExplainabilityBlock({ factors, isRiskAdapted }) {
     );
 }
 
-export function RecommendationPanel({ recommendations, loading, onAddToBet }) {
+
+
+function ScenarioCoverage({ scenarioFlags }) {
+    if (!scenarioFlags || scenarioFlags.length === 0) return null;
+
+    return (
+        <div className="mb-4 rounded-md border border-white/10 bg-[#232A36] p-3">
+            <div className="text-[10px] uppercase tracking-[0.14em] text-white/60 font-semibold mb-2">
+                Cas couverts par le moteur
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+                {scenarioFlags.map((flag) => (
+                    <span
+                        key={flag.key}
+                        className={`text-[10px] px-2 py-0.5 rounded border font-semibold ${SCENARIO_STYLE[flag.severity] || SCENARIO_STYLE.info}`}
+                    >
+                        {flag.label}
+                    </span>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+export function RecommendationPanel({ recommendations, loading, onAddToBet, scenarioFlags }) {
     if (loading) {
         return <div className="bg-[#1A1F28] border border-white/10 rounded-md p-4 shadow-sm text-white/70">Chargement...</div>;
     }
@@ -44,6 +75,8 @@ export function RecommendationPanel({ recommendations, loading, onAddToBet }) {
                 <div className="w-7 h-7 bg-betclic-red rounded-md flex items-center justify-center text-white">⭐</div>
                 <h2 className="text-sm font-bold text-white uppercase tracking-[0.12em]">Recommandé pour vous</h2>
             </div>
+
+            <ScenarioCoverage scenarioFlags={scenarioFlags} />
 
             <div className="space-y-3">
                 {recommendations.map((rec) => {

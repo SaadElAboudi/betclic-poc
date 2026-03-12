@@ -20,6 +20,8 @@ export function MatchPage() {
     const [recLoading, setRecLoading] = useState(false);
     const [betSlip, setBetSlip] = useState([]);
 
+    const selectedUser = users.find((user) => user.userId === selectedUserId) || null;
+
     // Load initial data
     useEffect(() => {
         const loadData = async () => {
@@ -249,7 +251,13 @@ export function MatchPage() {
             </main>
 
             {/* Bet Slip */}
-            <BetSlip bets={betSlip} onRemove={handleRemoveBet} onClear={handleClearBets} />
+            <BetSlip
+                bets={betSlip}
+                user={selectedUser}
+                riskSignal={riskSignal}
+                onRemove={handleRemoveBet}
+                onClear={handleClearBets}
+            />
 
             {/* Footer */}
             <footer className="border-t border-betclic-grayBorder mt-8 py-6 px-4 text-center text-xs text-betclic-grayText bg-[#FAFAFB]">

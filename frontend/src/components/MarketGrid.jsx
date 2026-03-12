@@ -3,13 +3,11 @@ import { formatOdds } from '../lib/api';
 
 export function MarketGrid({ markets, event, onAddToBet, recommendedMarketIds = [] }) {
     const [activeTab, setActiveTab] = useState('popular');
-    const [expandedSections, setExpandedSections] = useState(new Set(['popular']));
 
     if (!markets || Object.keys(markets).length === 0) {
-        return <div className="text-betclic-grayText">Aucun marché disponible</div>;
+        return <div className="text-white/60">Aucun marché disponible</div>;
     }
 
-    // Group markets by category
     const groupedMarkets = Object.values(markets).reduce((acc, market) => {
         const category = market.category || 'other';
         if (!acc[category]) acc[category] = [];
@@ -25,104 +23,6 @@ export function MarketGrid({ markets, event, onAddToBet, recommendedMarketIds = 
         { id: 'handicap', label: 'Handicap', icon: '⚖️' }
     ];
 
-    const toggleSection = (category) => {
-        const newExpanded = new Set(expandedSections);
-        if (newExpanded.has(category)) {
-            newExpanded.delete(category);
-        } else {
-            newExpanded.add(category);
-        }
-        setExpandedSections(newExpanded);
-    };
-
-    const renderMarket = (market) => {
-        const isThreeWay = market.options.length === 3 && market.type === 'match_winner';
-        const isGrid = market.options.length > 3;
-        const isRecommended = recommendedMarketIds.includes(market.marketId);
-
-        return (
-            <div
-                key={market.marketId}
-                className={`bg-white border rounded-lg p-3 shadow-sm hover:shadow-md transition ${isRecommended ? 'border-betclic-red/60' : 'border-betclic-grayBorder'
-                    }`}
-            >
-                <div className="flex items-center justify-between gap-2 mb-2.5">
-                    <div className="flex items-center gap-2">
-                        {market.icon && <span className="text-base">{market.icon}</span>}
-                        <div className="text-[11px] text-betclic-grayText uppercase tracking-wider font-bold">
-                            {market.name}
-                        </div>
-                    </div>
-                    {isRecommended && (
-                        <span className="text-[10px] px-2 py-0.5 rounded bg-betclic-red text-white font-semibold">
-                            Pour vous
-                        </span>
-                    )}
-                </div>
-                <div className={`grid gap-2 ${isThreeWay ? 'grid-cols-3' :
-                    isGrid ? 'grid-cols-2' :
-                        'grid-cols-2'
-                    }`}>
-                    {market.options.map((option) => (
-                        <button
-                            key={option.id}
-                            onClick={() => onAddToBet({
-                                id: option.id,
-                                market: market.name,
-                                selection: option.fullLabel || option.label,
-                                odds: option.odds
-                            })}
-                            className="bg-betclic-yellow hover:bg-betclic-yellowHover border border-betclic-yellow hover:border-betclic-yellowHover rounded-md p-2.5 transition group font-bold hover:scale-105 active:scale-95"
-                        >
-                            <div className="text-[11px] text-gray-900 font-bold uppercase tracking-wide leading-tight mb-1">
-                                {option.label}
-                            </div>
-                            <div className="text-base leading-none font-black text-gray-900">
-                                {formatOdds(option.odds)}
-                            </div>
-                        </button>
-                    ))}
-                </div>
-            </div>
-        );
-    };
-
-    const renderCategorySection = (categoryId) => {
-        const categoryMarkets = sortMarketsByPertinence(groupedMarkets[categoryId] || [], event, recommendedMarketIds);
-        if (categoryMarkets.length === 0) return null;
-
-        const isExpanded = expandedSections.has(categoryId);
-        const category = categories.find(c => c.id === categoryId);
-
-        return (
-            <div key={categoryId} className="border-b border-betclic-grayBorder last:border-0">
-                <button
-                    onClick={() => toggleSection(categoryId)}
-                    className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition"
-                >
-                    <div className="flex items-center gap-2">
-                        <span className="text-lg">{category?.icon}</span>
-                        <span className="font-bold text-sm text-gray-900 uppercase tracking-wide">
-                            {category?.label || categoryId}
-                        </span>
-                        <span className="text-xs text-betclic-grayText">
-                            ({categoryMarkets.length})
-                        </span>
-                    </div>
-                    <span className={`text-betclic-grayText transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
-                        ▼
-                    </span>
-                </button>
-                {isExpanded && (
-                    <div className="p-4 pt-0 space-y-3">
-                        {categoryMarkets.map(renderMarket)}
-                    </div>
-                )}
-            </div>
-        );
-    };
-
-    // For tab view (desktop)
     const currentCategoryMarkets = sortMarketsByPertinence(
         groupedMarkets[activeTab] || [],
         event,
@@ -131,8 +31,7 @@ export function MarketGrid({ markets, event, onAddToBet, recommendedMarketIds = 
 
     return (
         <div className="space-y-3">
-            {/* Tabs Navigation */}
-            <div className="bg-white border border-betclic-grayBorder rounded-lg overflow-hidden sticky top-0 z-10 shadow-sm">
+            <div className="bg-[#1A1F28] border border-white/10 rounded-lg overflow-hidden sticky top-[70px] z-10 shadow-sm">
                 <div className="flex overflow-x-auto scrollbar-hide">
                     {categories.map((category) => {
                         const count = (groupedMarkets[category.id] || []).length;
@@ -141,13 +40,10 @@ export function MarketGrid({ markets, event, onAddToBet, recommendedMarketIds = 
                         return (
                             <button
                                 key={category.id}
-                                onClick={() => {
-                                    setActiveTab(category.id);
-                                    setExpandedSections(new Set([category.id]));
-                                }}
+                                onClick={() => setActiveTab(category.id)}
                                 className={`flex-1 min-w-[100px] px-3 py-3 text-xs font-bold uppercase tracking-wide transition border-b-2 whitespace-nowrap ${activeTab === category.id
-                                    ? 'border-betclic-red text-betclic-red bg-red-50'
-                                    : 'border-transparent text-betclic-grayText hover:bg-gray-50'
+                                    ? 'border-betclic-red text-white bg-[#232A36]'
+                                    : 'border-transparent text-white/65 hover:bg-[#232A36]'
                                     }`}
                             >
                                 <div className="flex items-center justify-center gap-1.5">
@@ -160,9 +56,48 @@ export function MarketGrid({ markets, event, onAddToBet, recommendedMarketIds = 
                 </div>
             </div>
 
-            {/* Markets Grid */}
             <div className="space-y-3">
-                {currentCategoryMarkets.map(renderMarket)}
+                {currentCategoryMarkets.map((market) => {
+                    const isThreeWay = market.options.length === 3 && market.type === 'match_winner';
+                    const isGrid = market.options.length > 3;
+                    const isRecommended = recommendedMarketIds.includes(market.marketId);
+
+                    return (
+                        <div
+                            key={market.marketId}
+                            className={`bg-[#1A1F28] border rounded-lg p-3 shadow-sm ${isRecommended ? 'border-betclic-red/70' : 'border-white/10'}`}
+                        >
+                            <div className="flex items-center justify-between gap-2 mb-2.5">
+                                <div className="text-[11px] text-white/70 uppercase tracking-wider font-bold">{market.name}</div>
+                                {isRecommended && (
+                                    <span className="text-[10px] px-2 py-0.5 rounded bg-betclic-red text-white font-semibold">Pour vous</span>
+                                )}
+                            </div>
+
+                            <div className={`grid gap-2 ${isThreeWay ? 'grid-cols-3' : isGrid ? 'grid-cols-2' : 'grid-cols-2'}`}>
+                                {market.options.map((option) => (
+                                    <button
+                                        key={option.id}
+                                        onClick={() => onAddToBet({
+                                            id: option.id,
+                                            market: market.name,
+                                            selection: option.fullLabel || option.label,
+                                            odds: option.odds
+                                        })}
+                                        className="bg-betclic-yellow hover:bg-betclic-yellowHover border border-betclic-yellow rounded-md p-2.5 transition active:scale-95"
+                                    >
+                                        <div className="text-[11px] text-gray-900 font-bold uppercase tracking-wide leading-tight mb-1">
+                                            {option.label}
+                                        </div>
+                                        <div className="text-base leading-none font-black text-gray-900">
+                                            {formatOdds(option.odds)}
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );
@@ -180,7 +115,6 @@ function sortMarketsByPertinence(markets, event, recommendedMarketIds) {
 
         if (recommendedMarketIds.includes(market.marketId)) score += 100;
         if (market.category === 'popular') score += 30;
-
         if (market.type === 'next_goal' && (totalShots >= 14 || minute >= 60)) score += 20;
         if (market.type.startsWith('over_under_') && totalGoals >= 2) score += 18;
         if (market.type === 'both_teams_score' && totalGoals >= 2) score += 16;
